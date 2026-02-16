@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VOID ARCHIVE // HARLEY_LINK</title>
+    <title>THE VOID ARCHIVE // PROTOCOL_V3</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -14,9 +14,10 @@
     <style>
          :root {
             --accent: #ff3c3c;
-            --bg: radial-gradient(circle at 50% 50%, #0a0a0f 0%, #000000 100%);
-            --surface: rgba(15, 15, 20, 0.6);
-            --neon-glow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+            --bg: #020204;
+            --glass: rgba(20, 20, 30, 0.6);
+            --border: rgba(255, 60, 60, 0.2);
+            --neon: 0 0 15px var(--accent), 0 0 30px rgba(255, 60, 60, 0.3);
         }
         
         * {
@@ -24,6 +25,8 @@
             padding: 0;
             box-sizing: border-box;
             cursor: none;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) #000;
         }
         
         body {
@@ -32,15 +35,18 @@
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        /* --- Estética de Elite --- */
+        /* --- FX VISUAIS --- */
         
-        #particle-canvas {
+        .noise::before {
+            content: "";
             position: fixed;
             inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            opacity: 0.6;
+            z-index: -1;
+            opacity: 0.05;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
         }
         
         .vignette {
@@ -48,129 +54,244 @@
             inset: 0;
             z-index: 9998;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.95) 150%);
+            background: radial-gradient(circle, transparent 30%, #000 150%);
         }
         
-        .crt-overlay::before {
-            content: " ";
+        .scanlines {
             position: fixed;
             inset: 0;
             z-index: 9999;
             pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
-            opacity: 0.25;
-            animation: flicker 0.1s infinite alternate;
-        }
-        
-        @keyframes flicker {
-            0% {
-                opacity: 0.2;
-            }
-            100% {
-                opacity: 0.25;
-            }
+            background: repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 0, 0, 0.1) 3px);
+            opacity: 0.5;
         }
         
         #cursor {
             position: fixed;
-            width: 4px;
-            height: 4px;
-            background: var(--accent);
+            width: 6px;
+            height: 6px;
+            background: #fff;
             border-radius: 50%;
-            z-index: 10000;
+            z-index: 11000;
             pointer-events: none;
-            box-shadow: var(--neon-glow);
+            box-shadow: var(--neon);
+            mix-blend-mode: difference;
         }
-        /* --- UI --- */
+        /* --- LAYOUT PRINCIPAL (SPLIT SCREEN) --- */
         
         header {
-            height: 30vh;
+            height: 80px;
             display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 40px;
-            position: relative;
-            z-index: 10;
+            align-items: center;
+            padding: 0 40px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: space-between;
         }
         
-        .glitch-title {
-            font-family: 'Cinzel', serif;
-            font-size: 4rem;
-            letter-spacing: 20px;
+        .brand {
+            font-family: 'Cinzel';
+            font-size: 1.5rem;
+            letter-spacing: 5px;
             color: var(--accent);
-            text-shadow: var(--neon-glow);
+            text-shadow: var(--neon);
         }
         
-        #poetry-grid {
+        .status {
+            font-size: 0.7rem;
+            color: #555;
+        }
+        
+        #main-interface {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            padding: 40px;
-            max-width: 1400px;
-            margin: 0 auto;
-            overflow-y: auto;
-            height: 65vh;
-            z-index: 10;
-            position: relative;
+            grid-template-columns: 350px 1fr;
+            /* A MÁGICA ACONTECE AQUI */
+            height: calc(100vh - 80px);
+            /* Resto da tela */
+            gap: 20px;
+            padding: 20px;
         }
+        /* --- PAINEL ESQUERDO: O ÍNDICE --- */
         
-        .poem-card {
-            background: var(--surface);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 35px;
+        #archive-index {
+            background: var(--glass);
+            border: 1px solid var(--border);
             backdrop-filter: blur(20px);
-            transition: 0.4s;
-            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         
-        .poem-card:hover {
+        .index-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 60, 60, 0.1);
+            font-size: 0.9rem;
+            color: #888;
+            transition: 0.3s;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .index-item::before {
+            content: '>';
+            margin-right: 10px;
+            opacity: 0;
+            transition: 0.3s;
+            color: var(--accent);
+        }
+        
+        .index-item:hover {
+            color: #fff;
+            background: rgba(255, 60, 60, 0.05);
+            padding-left: 25px;
+        }
+        
+        .index-item:hover::before {
+            opacity: 1;
+        }
+        
+        .index-item.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
             border-color: var(--accent);
-            transform: scale(1.02) translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--neon);
         }
-        /* --- Terminal Oculto --- */
         
-        #secret-trigger {
+        .index-item.active::before {
+            content: '[LOADED]';
+            color: #000;
+            opacity: 1;
+            font-size: 0.7rem;
+            margin-right: 5px;
+        }
+        /* --- PAINEL DIREITO: O VISUALIZADOR --- */
+        
+        #archive-viewer {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(30px);
+            padding: 50px;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Estado Vazio */
+        
+        #empty-state {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #333;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+        /* Conteúdo do Poema */
+        
+        #viewer-content {
+            opacity: 0;
+            /* Escondido até carregar */
+        }
+        
+        #viewer-title {
+            font-family: 'Cinzel';
+            font-size: 2.5rem;
+            color: var(--accent);
+            text-shadow: var(--neon);
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        #viewer-body {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #eee;
+            white-space: pre-wrap;
+            /* PRESERVA INDENTAÇÃO */
+            margin-bottom: 40px;
+        }
+        
+        #viewer-controls {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .control-btn {
+            background: none;
+            border: 1px solid #333;
+            color: #555;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 0.7rem;
+            transition: 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .control-btn.delete:hover {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            box-shadow: var(--neon);
+        }
+        /* --- Terminais Ocultos (Admin) --- */
+        
+        #secret-door {
             position: fixed;
             bottom: 10px;
             right: 10px;
-            font-size: 0.5rem;
-            color: #111;
-            z-index: 10000;
-            cursor: pointer;
+            font-size: 0.6rem;
+            color: #333;
+            z-index: 10001;
+            opacity: 0.5;
         }
         
-        #secret-trigger:hover {
-            color: var(--accent);
-        }
-        
-        #admin-panel,
-        #auth-overlay {
+        #admin-modal,
+        #login-modal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9000;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 10500;
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(50px);
         }
         
         .terminal {
             width: 90%;
-            max-width: 450px;
+            max-width: 600px;
             border: 1px solid var(--accent);
             padding: 40px;
             background: #000;
-            box-shadow: var(--neon-glow);
+            box-shadow: var(--neon);
         }
         
         input,
         textarea {
             width: 100%;
-            background: #080808;
-            border: 1px solid #1a1a1a;
+            background: #0a0a0a;
+            border: 1px solid #222;
             padding: 15px;
             color: var(--accent);
             font-family: inherit;
@@ -178,131 +299,129 @@
             outline: none;
         }
         
-        .inject-btn {
+        .btn {
             width: 100%;
             padding: 20px;
             background: transparent;
             border: 1px solid var(--accent);
             color: var(--accent);
             font-weight: bold;
-            cursor: pointer;
-            letter-spacing: 3px;
             transition: 0.3s;
         }
         
-        .inject-btn:hover {
+        .btn:hover {
             background: var(--accent);
             color: #000;
-            box-shadow: var(--neon-glow);
+            box-shadow: var(--neon);
         }
         
         #loader {
             position: fixed;
             inset: 0;
             background: #000;
-            z-index: 10001;
+            z-index: 20000;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            pointer-events: none;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        /* Responsividade para Celular */
+        
+        @media (max-width: 768px) {
+            #main-interface {
+                grid-template-columns: 1fr;
+                grid-template-rows: 200px 1fr;
+            }
+            header {
+                padding: 0 20px;
+            }
+            .brand {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 
-<body class="crt-overlay">
-
-    <canvas id="particle-canvas"></canvas>
+<body class="noise">
+    <div class="scanlines"></div>
     <div class="vignette"></div>
     <div id="cursor"></div>
 
     <div id="loader">
-        <div id="l-text" style="color:var(--accent); font-size:0.7rem; letter-spacing:8px;">[ SINCRONIZANDO_ABISMO ]</div>
-        <div style="width: 150px; height: 1px; background: #111; margin-top: 20px;">
-            <div id="l-bar" style="width: 0%; height: 100%; background: var(--accent); box-shadow: var(--neon-glow);"></div>
-        </div>
+        <div style="color:var(--accent); font-size:0.8rem; letter-spacing:5px;">[ REESTRUTURANDO_NÚCLEO ]</div>
     </div>
 
     <header>
-        <h1 class="glitch-title">VOID_ARCHIVE</h1>
+        <div class="brand">VOID_ARCHIVE // V3</div>
+        <div class="status" id="sys-status">STATUS: AGUARDANDO SINC.</div>
     </header>
-    <main id="poetry-grid"></main>
-    <div id="secret-trigger" onclick="openAuth()">ERR_SYS_77</div>
 
-    <div id="auth-overlay">
-        <div class="terminal">
-            <p style="font-size:0.6rem; color:var(--accent); margin-bottom:20px;">>> IDENTIFICAÇÃO_OPERADOR</p>
-            <input type="text" id="user-name" placeholder="NOME_DO_USER">
-            <input type="password" id="user-pass" placeholder="SENHA">
-            <button class="inject-btn" onclick="signIn()">DESBLOQUEAR_SISTEMA</button>
+    <section id="main-interface">
+        <aside id="archive-index">
+        </aside>
+
+        <main id="archive-viewer">
+            <div id="empty-state">
+                <p>// NENHUM DADO SELECIONADO</p>
+                <p style="opacity: 0.5; margin-top: 10px;">Selecione um fragmento no índice lateral.</p>
+            </div>
+
+            <div id="viewer-content">
+                <div id="viewer-title">
+                    <span id="v-title-text"></span>
+                    <span id="v-mood-indicator" style="font-size:0.8rem; opacity:0.5;"></span>
+                </div>
+                <div id="viewer-body"></div>
+
+                <div id="viewer-controls">
+                    <button class="control-btn" id="play-btn" onclick="toggleAudio()">
+                        [ ▶ INICIAR ÁUDIO ]
+                    </button>
+                    <button class="control-btn delete hidden" id="delete-btn">
+                        [ X DELETAR FRAGMENTO ]
+                    </button>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <div id="secret-door" onclick="showLogin()">SYS_ADMIN_cb77</div>
+    <div id="login-modal">
+        <div class="terminal" style="max-width: 350px;">
+            <p style="color:var(--accent); margin-bottom:20px;">>> BIO_AUTH_HARLEY</p>
+            <input type="text" id="u-name" placeholder="OPERADOR">
+            <input type="password" id="u-pass" placeholder="CHAVE">
+            <button class="btn" onclick="authHarley()">DESBLOQUEAR</button>
         </div>
     </div>
-
-    <div id="admin-panel">
-        <div class="terminal" style="max-width: 600px;">
-            <p style="font-size:0.6rem; color:var(--accent); margin-bottom:20px;">>> ESTAÇÃO_DE_ESCRITA_HARLEY</p>
+    <div id="admin-modal">
+        <div class="terminal">
+            <p style="color:var(--accent); margin-bottom:20px;">>> INJEÇÃO_DE_DADOS</p>
             <input type="text" id="p-title" placeholder="TÍTULO">
-            <input type="text" id="p-yt" placeholder="ID_YOUTUBE">
-            <textarea id="p-content" rows="8" placeholder="VERSOS..."></textarea>
+            <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
+            <textarea id="p-content" rows="12" placeholder="VERSOS (Indentação preservada)..."></textarea>
             <input type="color" id="p-color" value="#ff3c3c">
-            <button class="inject-btn" onclick="injectPoem()">INJETAR NO ABISMO</button>
-            <button onclick="closeAdmin()" style="margin-top:20px; background:none; border:none; color:#222; font-size:0.5rem; width:100%; cursor:pointer;">[ FECHAR ]</button>
+            <button class="btn" onclick="savePoem()">INJETAR</button>
+            <button onclick="closeAdmin()" style="margin-top:20px; background:none; border:none; color:#555; width:100%; cursor:pointer;">[ SAIR ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- COLOQUE SUAS CHAVES AQUI ---
+        // --- CONFIGURAÇÃO (Coloque suas chaves aqui) ---
         const SB_URL = "https://kwapzpyijgeiobcvqtoj.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA";
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-        const sfx = {
-            startup: new Audio('https://www.soundjay.com/sci-fi/sounds/sci-fi-interface-1.mp3')
-        };
+        const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        // --- PARTÍCULAS ---
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        let particles = [];
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5;
-                this.speedX = Math.random() * 0.4 - 0.2;
-                this.speedY = Math.random() * 0.4 - 0.2;
-            }
-            draw() {
-                ctx.fillStyle = "#ff3c3c";
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                }
-            }
-        }
-        for (let i = 0; i < 100; i++) particles.push(new Particle());
+        let poemsData = [];
+        let currentPoem = null;
+        let isAdmin = false;
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
-
-        // --- CORE ---
+        // --- CORE & INIT ---
         window.addEventListener('mousemove', (e) => {
             gsap.to("#cursor", {
                 x: e.clientX,
@@ -310,32 +429,30 @@
                 duration: 0.1
             });
         });
-        document.addEventListener('DOMContentLoaded', () => {
-            gsap.to("#l-bar", {
-                width: "100%",
-                duration: 2.5,
-                onComplete: fetchArchive
-            });
+
+        document.addEventListener('DOMContentLoaded', async() => {
+            const {
+                data: {
+                    session
+                }
+            } = await supabase.auth.getSession();
+            if (session) {
+                isAdmin = true;
+                document.getElementById('sys-status').innerText = "STATUS: OPERADOR HARLEY CONECTADO";
+                document.getElementById('sys-status').style.color = "var(--accent)";
+            }
+            loadArchive();
         });
 
-        async function fetchArchive() {
+        async function loadArchive() {
             const {
                 data
-            } = await supabaseClient.from('poems').select('*').order('created_at', {
+            } = await supabase.from('poems').select('*').order('created_at', {
                 ascending: false
             });
             if (data) {
-                document.getElementById('poetry-grid').innerHTML = data.map(p => `
-                    <article class="poem-card" style="border-top: 2px solid ${p.mood_color}" onclick="playPoem('${p.yt_id}')">
-                        <h3 style="color:${p.mood_color}; margin-bottom:15px;">${p.title}</h3>
-                        <p style="font-size:0.8rem; opacity:0.6; line-height:1.7;">${p.content}</p>
-                    </article>
-                `).join('');
-                gsap.from(".poem-card", {
-                    opacity: 0,
-                    y: 30,
-                    stagger: 0.1
-                });
+                poemsData = data;
+                renderIndex(data);
             }
             gsap.to("#loader", {
                 opacity: 0,
@@ -344,54 +461,123 @@
             });
         }
 
-        // --- LOGIN: HARLEY PROTOCOL ---
-        function openAuth() {
-            document.getElementById('auth-overlay').style.display = 'flex';
+        // --- RENDERIZADOR DO ÍNDICE (Esquerda) ---
+        function renderIndex(data) {
+            const indexContainer = document.getElementById('archive-index');
+            indexContainer.innerHTML = data.map((p, i) => `
+                <div class="index-item" onclick="loadToViewer('${p.id}', this)" style="border-left: 3px solid ${p.mood_color}">
+                    <span>${p.title}</span>
+                    <span style="font-size:0.7rem; opacity:0.5;">[ID:${i.toString().padStart(3, '0')}]</span>
+                </div>
+            `).join('');
         }
 
-        function closeAdmin() {
-            document.getElementById('admin-panel').style.display = 'none';
-        }
+        // --- VISUALIZADOR (Direita) ---
+        function loadToViewer(id, itemElement) {
+            // Atualiza UI do índice
+            document.querySelectorAll('.index-item').forEach(el => el.classList.remove('active'));
+            itemElement.classList.add('active');
 
-        async function signIn() {
-            const user = document.getElementById('user-name').value;
-            const pass = document.getElementById('user-pass').value;
+            const poem = poemsData.find(p => p.id === id);
+            currentPoem = poem;
 
-            // Mapeia o nome "Harley" para o e-mail real do Supabase
-            if (user === "Harley" && pass === "317100") {
-                const {
-                    error
-                } = await supabaseClient.auth.signInWithPassword({
-                    email: "harley@void.com", // O e-mail que você criou no painel
-                    password: pass
+            // Animação de Troca
+            const tl = gsap.timeline();
+            tl.to("#viewer-content", {
+                    opacity: 0,
+                    duration: 0.2,
+                    onComplete: () => {
+                        // Injeta os dados
+                        document.getElementById('empty-state').style.display = 'none';
+                        document.getElementById('v-title-text').innerText = poem.title;
+                        document.getElementById('v-title-text').style.color = poem.mood_color;
+                        document.getElementById('v-mood-indicator').innerText = `[ MATIZ: ${poem.mood_color} ]`;
+                        document.getElementById('viewer-body').innerText = poem.content; // innerText preserva indentação com pre-wrap
+
+                        // Configura botões
+                        document.documentElement.style.setProperty('--accent', poem.mood_color);
+                        setupControls(poem);
+
+                        // Reseta player de áudio
+                        if (player) player.stopVideo();
+                        document.getElementById('play-btn').innerText = "[ ▶ INICIAR ÁUDIO ]";
+                    }
+                })
+                .to("#viewer-content", {
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: "power2.out"
                 });
+        }
 
-                if (!error) {
-                    document.getElementById('auth-overlay').style.display = 'none';
-                    document.getElementById('admin-panel').style.display = 'flex';
-                    sfx.startup.play();
-                } else {
-                    alert("FALHA_NA_SINCRO: " + error.message);
-                }
+        function setupControls(poem) {
+            const delBtn = document.getElementById('delete-btn');
+            if (isAdmin) {
+                delBtn.classList.remove('hidden');
+                delBtn.onclick = () => killPoem(poem.id);
             } else {
-                alert("ACESSO_NEGADO: IDENTIDADE_NÃO_RECONHECIDA");
+                delBtn.classList.add('hidden');
             }
         }
 
-        async function injectPoem() {
+        // --- ÁUDIO & ADMIN ---
+        let isPlaying = false;
+
+        function toggleAudio() {
+            if (!currentPoem || !player) return;
+            const btn = document.getElementById('play-btn');
+            if (isPlaying) {
+                player.pauseVideo();
+                btn.innerText = "[ ▶ RETOMAR ÁUDIO ]";
+            } else {
+                player.loadVideoById(currentPoem.yt_id);
+                player.playVideo();
+                btn.innerText = "[ ■ PAUSAR ÁUDIO ]";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function showLogin() {
+            document.getElementById('login-modal').style.display = 'flex';
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-modal').style.display = 'none';
+        }
+
+        async function authHarley() {
+            const user = document.getElementById('u-name').value;
+            const pass = document.getElementById('u-pass').value;
+            if (user === "Harley" && pass === "317100") {
+                const {
+                    error
+                } = await supabase.auth.signInWithPassword({
+                    email: "harley@void.com",
+                    password: pass
+                });
+                if (!error) location.reload();
+            }
+        }
+
+        async function savePoem() {
             const title = document.getElementById('p-title').value;
-            const yt_id = document.getElementById('p-yt').value;
             const content = document.getElementById('p-content').value;
+            const yt_id = document.getElementById('p-yt').value;
             const mood_color = document.getElementById('p-color').value;
-            const {
-                error
-            } = await supabaseClient.from('poems').insert([{
+            await supabase.from('poems').insert([{
                 title,
                 content,
                 yt_id,
                 mood_color
             }]);
-            if (!error) location.reload();
+            location.reload();
+        }
+
+        async function killPoem(id) {
+            if (confirm("CONFIRMAR DELEÇÃO DO FRAGMENTO?")) {
+                await supabase.from('poems').delete().eq('id', id);
+                location.reload();
+            }
         }
 
         let player;
@@ -402,13 +588,6 @@
                 width: '0',
                 videoId: ''
             });
-        }
-
-        function playPoem(id) {
-            if (player && id) {
-                player.loadVideoById(id);
-                player.playVideo();
-            }
         }
     </script>
     <script src="https://www.youtube.com/iframe_api"></script>
