@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID_ARCHIVE // NEON_OVERDRIVE</title>
+    <title>VOID_ARCHIVE // V7.0_FINAL_ABYSS</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -14,9 +14,9 @@
          :root {
             --neon: #bf00ff;
             --bg-pure: #000000;
-            --border: #bf00ff;
+            --glass-dark: rgba(10, 0, 20, 0.6);
             /* Brilho Neon Extremo */
-            --glow: 0 0 10px var(--neon), 0 0 25px var(--neon), 0 0 50px rgba(191, 0, 255, 0.4);
+            --glow: 0 0 10px var(--neon), 0 0 30px var(--neon), 0 0 60px rgba(191, 0, 255, 0.4);
             --text-glow: 0 0 8px var(--neon);
         }
         
@@ -36,14 +36,15 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- FX VISUAIS --- */
+        /* --- FX VISUAIS (TODOS ATIVOS) --- */
         
         #canvas-abyss {
             position: fixed;
             inset: 0;
             z-index: 1;
             pointer-events: none;
-            opacity: 0.9;
+            opacity: 0.8;
+            mix-blend-mode: screen;
         }
         
         .vignette {
@@ -51,7 +52,28 @@
             inset: 0;
             z-index: 9997;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 20%, #000 140%);
+            background: radial-gradient(circle, transparent 30%, #000 140%);
+        }
+        
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(0, 0, 0, 0.4) 2px);
+            opacity: 0.2;
+        }
+        /* [NOVO EFEITO 1] Textura de Ruído Digital */
+        
+        .noise::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 9996;
+            pointer-events: none;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.07;
+            mix-blend-mode: overlay;
         }
         
         #cursor {
@@ -65,37 +87,7 @@
             box-shadow: var(--glow);
             mix-blend-mode: screen;
         }
-        /* --- LOADER --- */
-        
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 100000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .loader-tag {
-            color: var(--neon);
-            font-size: 0.9rem;
-            letter-spacing: 12px;
-            text-shadow: var(--glow);
-            animation: l-pulse 1s infinite alternate;
-        }
-        
-        @keyframes l-pulse {
-            from {
-                opacity: 0.3;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1.05);
-            }
-        }
-        /* --- HEADER (NEON) --- */
+        /* --- HEADER --- */
         
         header {
             height: 70px;
@@ -103,10 +95,10 @@
             align-items: center;
             padding: 0 30px;
             border-bottom: 2px solid var(--neon);
-            background: #000;
+            background: rgba(0, 0, 0, 0.9);
             justify-content: space-between;
             z-index: 10;
-            box-shadow: 0 0 20px rgba(191, 0, 255, 0.3);
+            box-shadow: 0 0 30px rgba(191, 0, 255, 0.2);
         }
         
         .brand {
@@ -115,6 +107,19 @@
             letter-spacing: 10px;
             color: var(--neon);
             text-shadow: var(--glow);
+            animation: flicker-title 3s infinite alternate;
+            /* Leve oscilação no título */
+        }
+        
+        @keyframes flicker-title {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+                text-shadow: 0 0 10px var(--neon);
+            }
         }
         
         #main-interface {
@@ -130,43 +135,61 @@
         /* --- LISTA LATERAL --- */
         
         #archive-list {
-            background: rgba(0, 0, 0, 0.8);
+            background: var(--glass-dark);
             border: 1px solid var(--neon);
+            backdrop-filter: blur(15px);
             overflow-y: auto;
-            box-shadow: inset 0 0 15px rgba(191, 0, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(191, 0, 255, 0.1);
         }
         
         .list-item {
             padding: 22px;
-            border-bottom: 1px solid rgba(191, 0, 255, 0.3);
+            border-bottom: 1px solid rgba(191, 0, 255, 0.2);
             font-size: 0.85rem;
-            color: #555;
-            transition: 0.3s;
+            color: #666;
+            transition: 0.2s;
             cursor: pointer;
+            position: relative;
+        }
+        /* [NOVO EFEITO 2] Aberração Cromática no Hover */
+        
+        .list-item:hover span {
+            animation: chromatic-glitch 0.2s infinite linear alternate-reverse;
+            color: #fff;
+            text-shadow: var(--text-glow);
         }
         
-        .list-item:hover {
-            color: #fff;
-            background: rgba(191, 0, 255, 0.15);
-            text-shadow: var(--text-glow);
-            padding-left: 35px;
+        @keyframes chromatic-glitch {
+            0% {
+                text-shadow: -1px 0 #0ff, 1px 0 #f00;
+                transform: translate(0);
+            }
+            100% {
+                text-shadow: 1px 0 #0ff, -1px 0 #f00;
+                transform: translate(-1px, 1px);
+            }
         }
         
         .list-item.active {
             background: var(--neon);
-            color: #000;
+            color: #000 !important;
             font-weight: bold;
             box-shadow: var(--glow);
         }
-        /* --- VISUALIZADOR (FOCO NO BRILHO) --- */
+        
+        .list-item.active span {
+            animation: none;
+        }
+        /* Para o glitch quando ativo */
+        /* --- VISUALIZADOR --- */
         
         #viewer {
-            background: rgba(0, 0, 0, 0.9);
+            background: var(--glass-dark);
             border: 1px solid var(--neon);
+            backdrop-filter: blur(20px);
             padding: 60px;
             overflow-y: auto;
             position: relative;
-            box-shadow: inset 0 0 40px rgba(191, 0, 255, 0.1);
         }
         
         #empty-msg {
@@ -183,16 +206,15 @@
         
         #v-content {
             opacity: 0;
-            transform: scale(0.9);
         }
         
         #v-title {
             font-family: 'Cinzel';
-            font-size: 3.2rem;
+            font-size: 3.5rem;
             color: var(--neon);
             border-bottom: 3px solid var(--neon);
-            padding-bottom: 15px;
-            margin-bottom: 35px;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
             text-shadow: var(--glow);
         }
         
@@ -200,54 +222,63 @@
             font-size: 1.2rem;
             line-height: 2;
             white-space: pre-wrap;
-            color: #fff;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+            color: #eee;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
         }
-        /* --- BOTÕES --- */
+        /* --- LOADER & BTNS --- */
         
-        .btn-void {
-            background: none;
-            border: 2px solid var(--neon);
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loader-tag {
             color: var(--neon);
-            padding: 12px 30px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: 0.3s;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            text-shadow: var(--text-glow);
-            box-shadow: 0 0 10px rgba(191, 0, 255, 0.2);
+            font-size: 0.9rem;
+            letter-spacing: 12px;
+            text-shadow: var(--glow);
+            animation: l-pulse 0.8s infinite alternate;
         }
         
-        .btn-void:hover {
-            background: var(--neon);
-            color: #000;
-            box-shadow: var(--glow);
+        @keyframes l-pulse {
+            from {
+                opacity: 0.3;
+                letter-spacing: 12px;
+            }
+            to {
+                opacity: 1;
+                letter-spacing: 15px;
+            }
         }
-        /* BOTÃO ADICIONAR (SINAL DE ALERTA NO CANTO) */
         
         #admin-trigger {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 40px;
-            height: 40px;
-            border: 1px solid #111;
+            width: 50px;
+            height: 50px;
+            border: 2px solid #111;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #111;
-            font-size: 0.6rem;
+            font-size: 0.7rem;
             cursor: pointer;
             z-index: 10001;
+            transition: 0.3s;
         }
         
         #admin-trigger:hover {
             color: var(--neon);
             border-color: var(--neon);
-            text-shadow: var(--text-glow);
+            box-shadow: var(--glow);
+            transform: rotate(90deg);
         }
-        /* MODAIS */
         
         .modal {
             position: fixed;
@@ -257,7 +288,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(30px);
         }
         
         .terminal {
@@ -282,68 +313,78 @@
             font-size: 1rem;
         }
         
+        .btn-void {
+            background: var(--neon);
+            border: none;
+            color: #000;
+            padding: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            letter-spacing: 3px;
+        }
+        
         .hidden {
             display: none !important;
         }
     </style>
 </head>
 
-<body>
+<body class="noise scanlines">
 
     <canvas id="canvas-abyss"></canvas>
     <div class="vignette"></div>
     <div id="cursor"></div>
 
     <div id="loader">
-        <div class="loader-tag">[ SINCRONIZANDO_HARLEY_V6.2 ]</div>
+        <div class="loader-tag">[ SYSTEM_OVERRIDE_V7.0 ]</div>
     </div>
 
     <header>
-        <div class="brand">NEURAL_ARCHIVE</div>
-        <div id="status-tag" style="font-size: 0.6rem; color: #111;">// BRIGHT_NEON_ACTIVE</div>
+        <div class="brand">VOID_ARCHIVE</div>
+        <div id="status-tag" style="font-size: 0.7rem; color: #111; letter-spacing: 3px;">// ABYSS_CORE: READY</div>
     </header>
 
     <section id="main-interface">
         <aside id="archive-list"></aside>
         <main id="viewer">
-            <div id="empty-msg">// VOID_AWAITING_INPUT //</div>
+            <div id="empty-msg">// AWAITING_SIGNAL //</div>
             <div id="v-content">
                 <div id="v-title"></div>
                 <div id="v-body"></div>
                 <div style="display:flex; gap:25px; margin-top:60px;">
-                    <button class="btn-void" onclick="handleAudio()">[ ▶ PLAY_SIGNAL ]</button>
-                    <button class="btn-void hidden" id="del-btn" style="border-color:#ff0000; color:#ff0000;">[ X PURGE ]</button>
+                    <button class="btn-void" onclick="handleAudio()" style="background:none; border:2px solid var(--neon); color:var(--neon);">[ ▶ PLAY_SIGNAL ]</button>
+                    <button class="btn-void hidden" id="del-btn" style="background:none; border:2px solid #f00; color:#f00;">[ X PURGE ]</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="admin-trigger" onclick="showAuth()">[ADMIN]</div>
+    <div id="admin-trigger" onclick="showAuth()">[+]</div>
 
     <div id="auth-modal" class="modal">
         <div class="terminal">
-            <p style="color:var(--neon); margin-bottom:25px; font-size:0.8rem;">// OPERADOR_REQUERIDO</p>
-            <input type="text" id="u-id" placeholder="USER (Harley)">
-            <input type="password" id="u-key" placeholder="PASS (317100)">
-            <button class="btn-void" style="width:100%" onclick="login()">AUTENTICAR</button>
+            <p style="color:var(--neon); margin-bottom:25px; font-size:0.8rem;">// ID_OPERADOR: Harley</p>
+            <input type="password" id="u-key" placeholder="CHAVE (317100)">
+            <button class="btn-void" onclick="login()">AUTENTICAR</button>
         </div>
     </div>
 
     <div id="admin-modal" class="modal">
         <div class="terminal">
-            <input type="text" id="p-title" placeholder="TÍTULO DO FRAGMENTO">
+            <input type="text" id="p-title" placeholder="TÍTULO">
             <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
             <textarea id="p-content" rows="12" placeholder="VERSOS..."></textarea>
-            <input type="color" id="p-color" value="#bf00ff" style="height:45px; cursor:pointer;">
-            <button class="btn-void" style="width:100%" onclick="save()">INJETAR_DADOS</button>
-            <button onclick="closeModals()" style="margin-top:20px; background:none; border:none; color:#444; cursor:pointer; width:100%; font-size:0.6rem;">[ DESCONECTAR ]</button>
+            <input type="color" id="p-color" value="#bf00ff" style="height:45px;">
+            <button class="btn-void" onclick="save()">INJETAR_DADOS</button>
+            <button onclick="closeModals()" style="margin-top:20px; background:none; border:none; color:#444; cursor:pointer; width:100%; font-size:0.6rem;">[ FECHAR ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- NUCLEO_HARLEY_CORE (REDECODE) ---
+        // --- NUCLEO_FINAL (HARLEY_CORE) ---
         const harleyCore = supabase.createClient(
             "https://kwapzpyijgeiobcvqtoj.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
@@ -352,7 +393,7 @@
         let archiveData = [];
         let isAuth = false;
 
-        // --- PARTÍCULAS (BRILHO MÁXIMO) ---
+        // --- PARTÍCULAS GLOW (CANVAS) ---
         const canvas = document.getElementById('canvas-abyss');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -376,14 +417,14 @@
             }
             draw() {
                 ctx.fillStyle = "#bf00ff";
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 20;
                 ctx.shadowColor = "#bf00ff";
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
-        for (let i = 0; i < 120; i++) pArray.push(new Particle());
+        for (let i = 0; i < 130; i++) pArray.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -395,7 +436,7 @@
         }
         animate();
 
-        // --- CORE ENGINE ---
+        // --- CORE ---
         window.addEventListener('mousemove', (e) => {
             gsap.to("#cursor", {
                 x: e.clientX,
@@ -414,12 +455,14 @@
                 if (session) {
                     isAuth = true;
                     document.getElementById('status-tag').style.color = "var(--neon)";
+                    document.getElementById('status-tag').innerText = "// OPERADOR: ATIVO";
                 }
                 await loadArchive();
             } finally {
                 gsap.to("#loader", {
                     opacity: 0,
-                    duration: 1,
+                    duration: 1.2,
+                    ease: "power2.inOut",
                     onComplete: () => document.getElementById('loader').style.display = 'none'
                 });
             }
@@ -440,33 +483,33 @@
         function renderLista() {
             document.getElementById('archive-list').innerHTML = archiveData.map((p, i) => `
                 <div class="list-item" onclick="viewFragmento('${p.id}', this)" style="border-left: 5px solid ${p.mood_color}">
-                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[#${i.toString().padStart(3, '0')}]</span>
+                    <span>${p.title}</span> <span style="opacity:0.3; font-size:0.6rem;">[#${i}]</span>
                 </div>
             `).join('');
         }
 
         function viewFragmento(id, el) {
-            // Fix clique: removemos classes anteriores e ativamos a nova
             document.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
             const frag = archiveData.find(f => f.id === id);
 
-            // Explosão Visual com GSAP
             document.getElementById('empty-msg').style.display = 'none';
             const v = document.getElementById('v-content');
 
+            // GSAP EXPLOSION
             gsap.fromTo(v, {
                 opacity: 0,
-                scale: 0.8
+                scale: 0.9,
+                filter: "blur(10px)"
             }, {
                 opacity: 1,
                 scale: 1,
-                duration: 0.6,
-                ease: "back.out(1.7)",
+                filter: "blur(0px)",
+                duration: 0.7,
+                ease: "expo.out",
                 onStart: () => {
                     document.getElementById('v-title').innerText = frag.title;
                     document.getElementById('v-title').style.color = frag.mood_color;
-
                     const body = document.getElementById('v-body');
                     body.innerHTML = "";
                     let idx = 0;
@@ -487,7 +530,7 @@
                 const d = document.getElementById('del-btn');
                 d.classList.remove('hidden');
                 d.onclick = async() => {
-                    if (confirm("REMOVER_DADOS?")) {
+                    if (confirm("EXPURGAR DADOS?")) {
                         await harleyCore.from('poems').delete().eq('id', id);
                         location.reload();
                     }
@@ -495,7 +538,7 @@
             }
         }
 
-        // --- ADMIN ACTIONS ---
+        // --- ADMIN ---
         function showAuth() {
             document.getElementById('auth-modal').style.display = 'flex';
         }
@@ -504,9 +547,8 @@
             document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         }
         async function login() {
-            const u = document.getElementById('u-id').value;
             const k = document.getElementById('u-key').value;
-            if (u === "Harley" && k === "317100") {
+            if (k === "317100") {
                 await harleyCore.auth.signInWithPassword({
                     email: "harley@void.com",
                     password: k
