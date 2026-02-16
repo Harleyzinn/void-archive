@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THE VOID ARCHIVE // HARLEY_V3.3</title>
+    <title>NEURAL_ARCHIVE // HARLEY_V5</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -12,11 +12,12 @@
 
     <style>
          :root {
-            --accent: #ff3c3c;
-            --bg: #020204;
-            --glass: rgba(15, 15, 20, 0.8);
-            --border: rgba(255, 60, 60, 0.2);
-            --neon: 0 0 15px var(--accent);
+            --neon-purple: #bf00ff;
+            --deep-purple: #1a0026;
+            --bg-black: #000000;
+            --glass: rgba(10, 0, 15, 0.7);
+            --border: rgba(191, 0, 255, 0.2);
+            --glow: 0 0 15px var(--neon-purple), 0 0 30px rgba(191, 0, 255, 0.3);
         }
         
         * {
@@ -24,10 +25,12 @@
             padding: 0;
             box-sizing: border-box;
             cursor: none;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-purple) #000;
         }
         
         body {
-            background: var(--bg);
+            background: var(--bg-black);
             color: #fff;
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
@@ -35,15 +38,23 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- FX CAMADAS --- */
+        /* --- FX VISUAIS --- */
+        
+        #abyss-particles {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.8;
+        }
         
         .scanlines {
             position: fixed;
             inset: 0;
             z-index: 9998;
             pointer-events: none;
-            background: repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 0, 0, 0.1) 3px);
-            opacity: 0.4;
+            background: repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 0, 0, 0.2) 3px);
+            opacity: 0.5;
         }
         
         .vignette {
@@ -51,7 +62,7 @@
             inset: 0;
             z-index: 9997;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 40%, #000 160%);
+            background: radial-gradient(circle, transparent 30%, #000 150%);
         }
         
         #cursor {
@@ -62,10 +73,10 @@
             border-radius: 50%;
             z-index: 11000;
             pointer-events: none;
-            box-shadow: var(--neon);
-            mix-blend-mode: difference;
+            box-shadow: var(--glow);
+            mix-blend-mode: screen;
         }
-        /* --- LOADER PRIORITÁRIO --- */
+        /* --- LOADER --- */
         
         #loader {
             position: fixed;
@@ -77,107 +88,164 @@
             align-items: center;
             justify-content: center;
         }
-        /* --- LAYOUT SPLIT --- */
+        
+        .loader-msg {
+            color: var(--neon-purple);
+            font-size: 0.7rem;
+            letter-spacing: 8px;
+            text-shadow: var(--glow);
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        /* --- LAYOUT --- */
         
         header {
             height: 70px;
             display: flex;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 40px;
             border-bottom: 1px solid var(--border);
             background: rgba(0, 0, 0, 0.8);
             justify-content: space-between;
             flex-shrink: 0;
+            z-index: 10;
         }
         
         .brand {
             font-family: 'Cinzel';
-            font-size: 1.3rem;
-            letter-spacing: 5px;
-            color: var(--accent);
-            text-shadow: var(--neon);
+            font-size: 1.4rem;
+            letter-spacing: 6px;
+            color: var(--neon-purple);
+            text-shadow: var(--glow);
         }
         
         #main-interface {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 350px 1fr;
             height: calc(100vh - 70px);
             overflow: hidden;
             gap: 15px;
             padding: 15px;
+            position: relative;
+            z-index: 5;
         }
-        /* ÍNDICE COM ABERRAÇÃO */
+        /* PAINEL ESQUERDO: ÍNDICE */
         
         #archive-index {
             background: var(--glass);
             border: 1px solid var(--border);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
             overflow-y: auto;
         }
         
         .index-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255, 60, 60, 0.05);
+            padding: 18px 25px;
+            border-bottom: 1px solid rgba(191, 0, 255, 0.1);
             font-size: 0.85rem;
             color: #555;
-            transition: 0.3s;
+            transition: 0.4s;
             cursor: pointer;
         }
         
         .index-item:hover {
             color: #fff;
-            background: rgba(255, 60, 60, 0.03);
-            text-shadow: 1px 0 #0ff, -1px 0 #f0f;
+            background: rgba(191, 0, 255, 0.05);
+            padding-left: 35px;
+            text-shadow: 0 0 10px var(--neon-purple);
         }
         
         .index-item.active {
-            background: var(--accent);
+            background: var(--neon-purple);
             color: #000;
             font-weight: bold;
-            text-shadow: none;
+            box-shadow: var(--glow);
         }
-        /* VISUALIZADOR */
+        /* PAINEL DIREITO: VISUALIZADOR */
         
         #archive-viewer {
             background: var(--glass);
             border: 1px solid var(--border);
             backdrop-filter: blur(40px);
-            padding: 40px;
+            padding: 50px;
             overflow-y: auto;
             position: relative;
         }
         
+        #viewer-content {
+            opacity: 0;
+        }
+        
         #viewer-title {
             font-family: 'Cinzel';
-            font-size: 2.2rem;
-            color: var(--accent);
-            margin-bottom: 25px;
-            padding-bottom: 15px;
+            font-size: 2.5rem;
+            color: var(--neon-purple);
             border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            text-shadow: var(--glow);
         }
         
         #viewer-body {
-            font-size: 0.95rem;
-            line-height: 1.8;
+            font-size: 1.05rem;
+            line-height: 1.9;
             white-space: pre-wrap;
             color: #bbb;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
         }
+        /* BOTÕES */
+        
+        .btn-abyss {
+            background: none;
+            border: 1px solid var(--border);
+            color: #888;
+            padding: 12px 25px;
+            font-family: inherit;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .btn-abyss:hover {
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+            box-shadow: var(--glow);
+        }
+        /* MOBILE FIX */
         
         @media (max-width: 768px) {
             #main-interface {
                 grid-template-columns: 1fr;
                 grid-template-rows: 35% 1fr;
             }
+            .brand {
+                font-size: 1rem;
+            }
+            #archive-viewer {
+                padding: 30px;
+            }
+            #viewer-title {
+                font-size: 1.6rem;
+            }
         }
-        /* ADMIN HIDDEN */
+        /* MODAIS ADMIN */
         
         #secret-door {
             position: fixed;
             bottom: 10px;
             right: 10px;
             font-size: 0.5rem;
-            color: #111;
+            color: #080808;
             z-index: 10001;
             cursor: pointer;
         }
@@ -190,37 +258,39 @@
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(40px);
+            backdrop-filter: blur(50px);
         }
         
         .terminal {
             width: 90%;
             max-width: 500px;
-            border: 1px solid var(--accent);
+            border: 1px solid var(--neon-purple);
             padding: 40px;
             background: #000;
+            box-shadow: var(--glow);
         }
         
         input,
         textarea {
             width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #222;
+            background: #050505;
+            border: 1px solid #1a1a1a;
             padding: 15px;
-            color: var(--accent);
+            color: var(--neon-purple);
             font-family: inherit;
             margin-bottom: 15px;
             outline: none;
         }
         
-        .btn {
+        .btn-confirm {
             width: 100%;
-            padding: 15px;
-            background: var(--accent);
+            padding: 18px;
+            background: var(--neon-purple);
             border: none;
             color: #000;
             font-weight: bold;
             cursor: pointer;
+            letter-spacing: 3px;
         }
         
         .hidden {
@@ -231,70 +301,120 @@
 
 <body class="scanlines">
 
+    <canvas id="abyss-particles"></canvas>
     <div class="vignette"></div>
     <div id="cursor"></div>
 
     <div id="loader">
-        <div style="color:var(--accent); font-size:0.7rem; letter-spacing:10px;">[ ESTABILIZANDO_NUCLEO_V3.3 ]</div>
+        <div class="loader-msg">[ SINCRONIZANDO_NUCLEO_V5.0 ]</div>
+        <div style="width: 200px; height: 1px; background: #111; margin-top: 20px; position:relative; overflow:hidden;">
+            <div id="l-progress" style="width: 0%; height: 100%; background: var(--neon-purple); box-shadow: var(--glow);"></div>
+        </div>
     </div>
 
     <header>
-        <div class="brand">VOID_ARCHIVE // HARLEY</div>
-        <div id="sys-status" style="font-size: 0.6rem; color: #333;">// LINK: SECURE</div>
+        <div class="brand">NEURAL_ARCHIVE // HARLEY</div>
+        <div id="sys-status" style="font-size: 0.6rem; color: #222;">// SYSTEM_STATUS: ONLINE</div>
     </header>
 
     <section id="main-interface">
         <aside id="archive-index"></aside>
         <main id="archive-viewer">
-            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#222; font-size:0.8rem;">// AGUARDANDO_DADOS //</div>
-            <div id="viewer-content" style="opacity:0;">
+            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111; font-size:0.8rem; letter-spacing:10px;">// VOID_EMPTY //</div>
+            <div id="viewer-content">
                 <div id="viewer-title"></div>
                 <div id="viewer-body"></div>
                 <div style="display:flex; gap:15px;">
-                    <button class="control-btn" onclick="toggleAudio()" style="background:none; border:1px solid var(--border); color:#555; padding:10px; font-size:0.6rem; cursor:pointer;">[ ▶ AUDIO ]</button>
-                    <button id="del-btn" class="hidden" style="background:none; border:1px solid #500; color:#500; padding:10px; font-size:0.6rem; cursor:pointer;">[ X DELETE ]</button>
+                    <button class="btn-abyss" id="audio-toggle" onclick="handleAudio()">[ ▶ AUDIO_INIT ]</button>
+                    <button class="btn-abyss hidden" id="del-btn" style="border-color:#4a0000; color:#4a0000;">[ X DELETE ]</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="secret-door" onclick="showLogin()">ERR_LINK_77</div>
+    <div id="secret-door" onclick="showAuth()">ERR_NULL_LINK_77</div>
 
-    <div id="login-modal" class="terminal-overlay">
+    <div id="auth-modal" class="terminal-overlay">
         <div class="terminal">
-            <input type="text" id="u-name" placeholder="ID">
-            <input type="password" id="u-pass" placeholder="PASS">
-            <button class="btn" onclick="authHarley()">ACCESS</button>
+            <p style="color:var(--neon-purple); margin-bottom:25px; font-size:0.7rem;">// BIO_AUTH_REQUIRED</p>
+            <input type="text" id="u-id" placeholder="OPERADOR">
+            <input type="password" id="u-key" placeholder="CHAVE_DE_ACESSO">
+            <button class="btn-confirm" onclick="verifyAdmin()">DESBLOQUEAR</button>
         </div>
     </div>
 
-    <div id="admin-modal" class="terminal-overlay">
+    <div id="inject-modal" class="terminal-overlay">
         <div class="terminal">
+            <p style="color:var(--neon-purple); margin-bottom:20px; font-size:0.7rem;">// INJETAR_DADOS_ABISSAIS</p>
             <input type="text" id="p-title" placeholder="TÍTULO">
-            <input type="text" id="p-yt" placeholder="YT_ID">
-            <textarea id="p-content" rows="10" placeholder="VERSOS..."></textarea>
-            <input type="color" id="p-color" value="#ff3c3c">
-            <button class="btn" onclick="savePoem()">INJECT</button>
+            <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
+            <textarea id="p-content" rows="10" placeholder="DEPOSITE_SEUS_VERSOS..."></textarea>
+            <input type="color" id="p-color" value="#bf00ff" style="height:40px; cursor:pointer;">
+            <button class="btn-confirm" onclick="injectData()">EXECUTAR_INJEÇÃO</button>
+            <button onclick="closeModals()" style="background:none; border:none; color:#333; margin-top:15px; cursor:pointer; width:100%; font-size:0.6rem;">[ CANCELAR ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // RENOMEADO PARA EVITAR CONFLITO (CORREÇÃO DA IMAGEM 3)
-        const supabaseClient = supabase.createClient(
+        // --- CONFIGURAÇÃO DO NÚCLEO (V5 - SEM CONFLITOS) ---
+        const $void_core = supabase.createClient(
             "https://kwapzpyijgeiobcvqtoj.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
         );
 
-        let poemsData = [];
-        let currentPoem = null;
-        let isAdmin = false;
+        let archiveData = [];
+        let selectedFragment = null;
+        let isOperator = false;
 
-        function hideLoader() {
+        // --- PARTÍCULAS DE ABISSO (CANVAS) ---
+        const canvas = document.getElementById('abyss-particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let pArray = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                }
+            }
+            draw() {
+                ctx.fillStyle = "#bf00ff";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        for (let i = 0; i < 150; i++) pArray.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pArray.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- SISTEMA DE CARREGAMENTO ---
+        function closeLoader() {
             gsap.to("#loader", {
                 opacity: 0,
-                duration: 0.8,
+                duration: 1,
+                delay: 0.5,
                 onComplete: () => {
                     document.getElementById('loader').style.display = 'none';
                 }
@@ -302,103 +422,124 @@
         }
 
         document.addEventListener('DOMContentLoaded', async() => {
+            gsap.to("#l-progress", {
+                width: "100%",
+                duration: 3
+            });
             try {
                 const {
                     data: {
                         session
                     }
-                } = await supabaseClient.auth.getSession();
+                } = await $void_core.auth.getSession();
                 if (session) {
-                    isAdmin = true;
-                    document.getElementById('sys-status').style.color = "var(--accent)";
+                    isOperator = true;
+                    document.getElementById('sys-status').style.color = "var(--neon-purple)";
                 }
-                await loadArchive();
-            } catch (err) {
-                console.error("Critical Failure:", err);
+                await refreshArchive();
             } finally {
-                hideLoader(); // SEMPRE ESCONDE O LOADER (CORREÇÃO DA IMAGEM 5)
+                closeLoader();
             }
         });
 
-        async function loadArchive() {
+        async function refreshArchive() {
             const {
                 data
-            } = await supabaseClient.from('poems').select('*').order('created_at', {
+            } = await $void_core.from('poems').select('*').order('created_at', {
                 ascending: false
             });
             if (data) {
-                poemsData = data;
-                renderIndex(data);
+                archiveData = data;
+                renderIndex();
             }
         }
 
-        function renderIndex(data) {
-            document.getElementById('archive-index').innerHTML = data.map((p, i) => `
-                <div class="index-item" onclick="loadToViewer('${p.id}', this)" style="border-left: 2px solid ${p.mood_color}">
-                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[#${i}]</span>
+        function renderIndex() {
+            const index = document.getElementById('archive-index');
+            index.innerHTML = archiveData.map((p, i) => `
+                <div class="index-item" onclick="viewFragment('${p.id}', this)" style="border-left: 3px solid ${p.mood_color}">
+                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[${i.toString().padStart(3, '0')}]</span>
                 </div>
             `).join('');
         }
 
-        function loadToViewer(id, el) {
-            document.querySelectorAll('.index-item').forEach(x => x.classList.remove('active'));
+        function viewFragment(id, el) {
+            document.querySelectorAll('.index-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            currentPoem = poemsData.find(p => p.id === id);
+            selectedFragment = archiveData.find(f => f.id === id);
 
             document.getElementById('empty-state').style.display = 'none';
-            const content = document.getElementById('viewer-content');
-            content.style.opacity = 1;
-            document.getElementById('viewer-title').innerText = currentPoem.title;
-            document.getElementById('viewer-title').style.color = currentPoem.mood_color;
+            const viewer = document.getElementById('viewer-content');
+            viewer.style.opacity = 0;
 
-            // EFEITO TYPEWRITER
+            document.getElementById('viewer-title').innerText = selectedFragment.title;
+            document.getElementById('viewer-title').style.color = selectedFragment.mood_color;
+
             const body = document.getElementById('viewer-body');
             body.innerHTML = "";
-            let i = 0;
-            const text = currentPoem.content;
+            let charIndex = 0;
+            const text = selectedFragment.content;
 
-            function type() {
-                if (i < text.length) {
-                    body.innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(type, 15);
+            function typewriter() {
+                if (charIndex < text.length) {
+                    body.innerHTML += text.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typewriter, 15);
                 }
             }
-            type();
+            typewriter();
+            gsap.to(viewer, {
+                opacity: 1,
+                duration: 0.5
+            });
 
-            if (isAdmin) {
+            if (isOperator) {
                 const d = document.getElementById('del-btn');
                 d.classList.remove('hidden');
                 d.onclick = async() => {
-                    if (confirm("DELETE?")) {
-                        await supabaseClient.from('poems').delete().eq('id', currentPoem.id);
+                    if (confirm("REMOVER_DADOS?")) {
+                        await $void_core.from('poems').delete().eq('id', id);
                         location.reload();
                     }
                 };
             }
         }
 
-        function showLogin() {
-            document.getElementById('login-modal').style.display = 'flex';
+        // --- INTERAÇÕES ---
+        window.addEventListener('mousemove', (e) => {
+            gsap.to("#cursor", {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.1
+            });
+        });
+
+        function showAuth() {
+            document.getElementById('auth-modal').style.display = 'flex';
         }
-        async function authHarley() {
-            const u = document.getElementById('u-name').value;
-            const p = document.getElementById('u-pass').value;
-            if (u === "Harley" && p === "317100") {
-                await supabaseClient.auth.signInWithPassword({
+
+        function closeModals() {
+            document.querySelectorAll('.terminal-overlay').forEach(m => m.style.display = 'none');
+        }
+
+        async function verifyAdmin() {
+            const u = document.getElementById('u-id').value;
+            const k = document.getElementById('u-key').value;
+            if (u === "Harley" && k === "317100") {
+                await $void_core.auth.signInWithPassword({
                     email: "harley@void.com",
-                    password: p
+                    password: k
                 });
                 location.reload();
             }
         }
 
-        async function savePoem() {
+        async function injectData() {
             const t = document.getElementById('p-title').value;
             const c = document.getElementById('p-content').value;
             const y = document.getElementById('p-yt').value;
             const cl = document.getElementById('p-color').value;
-            await supabaseClient.from('poems').insert([{
+            await $void_core.from('poems').insert([{
                 title: t,
                 content: c,
                 yt_id: y,
@@ -407,13 +548,6 @@
             location.reload();
         }
 
-        window.addEventListener('mousemove', (e) => {
-            gsap.to("#cursor", {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.1
-            });
-        });
         let player;
 
         function onYouTubeIframeAPIReady() {
@@ -425,13 +559,16 @@
         }
         let isPlaying = false;
 
-        function toggleAudio() {
-            if (!currentPoem || !player) return;
+        function handleAudio() {
+            if (!selectedFragment || !player) return;
+            const btn = document.getElementById('audio-toggle');
             if (isPlaying) {
                 player.pauseVideo();
+                btn.innerText = "[ ▶ AUDIO_RESUME ]";
             } else {
-                player.loadVideoById(currentPoem.yt_id);
+                player.loadVideoById(selectedFragment.yt_id);
                 player.playVideo();
+                btn.innerText = "[ ■ AUDIO_STOP ]";
             }
             isPlaying = !isPlaying;
         }
