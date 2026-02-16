@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL_ARCHIVE // HARLEY_V5</title>
+    <title>NEURAL_ARCHIVE // HARLEY_V5.2</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -13,12 +13,12 @@
     <style>
          :root {
             --neon-purple: #bf00ff;
-            --deep-purple: #1a0026;
             --bg-black: #000000;
-            --glass: rgba(10, 0, 15, 0.7);
-            --border: rgba(191, 0, 255, 0.2);
-            --glow: 0 0 15px var(--neon-purple), 0 0 30px rgba(191, 0, 255, 0.3);
+            --glass-clean: rgba(5, 0, 15, 0.4);
+            --border-purple: rgba(191, 0, 255, 0.3);
+            --neon-glow: 0 0 15px var(--neon-purple), 0 0 30px rgba(191, 0, 255, 0.2);
         }
+        /* --- RESET & ESTRUTURA --- */
         
         * {
             margin: 0;
@@ -30,7 +30,7 @@
         }
         
         body {
-            background: var(--bg-black);
+            background-color: var(--bg-black) !important;
             color: #fff;
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
@@ -38,23 +38,14 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- FX VISUAIS --- */
+        /* --- CAMADAS VISUAIS (ANTI-CINZA) --- */
         
         #abyss-particles {
             position: fixed;
             inset: 0;
             z-index: 1;
             pointer-events: none;
-            opacity: 0.8;
-        }
-        
-        .scanlines {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            pointer-events: none;
-            background: repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 0, 0, 0.2) 3px);
-            opacity: 0.5;
+            opacity: 0.7;
         }
         
         .vignette {
@@ -62,18 +53,27 @@
             inset: 0;
             z-index: 9997;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 30%, #000 150%);
+            background: radial-gradient(circle, transparent 20%, #000 140%);
+        }
+        
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(0, 0, 0, 0.4) 2px);
+            opacity: 0.15;
         }
         
         #cursor {
             position: fixed;
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             background: #fff;
             border-radius: 50%;
             z-index: 11000;
             pointer-events: none;
-            box-shadow: var(--glow);
+            box-shadow: var(--neon-glow);
             mix-blend-mode: screen;
         }
         /* --- LOADER --- */
@@ -89,15 +89,15 @@
             justify-content: center;
         }
         
-        .loader-msg {
+        .loader-txt {
             color: var(--neon-purple);
             font-size: 0.7rem;
-            letter-spacing: 8px;
-            text-shadow: var(--glow);
-            animation: blink 1.5s infinite;
+            letter-spacing: 10px;
+            text-shadow: var(--neon-glow);
+            animation: pulse 1.5s infinite;
         }
         
-        @keyframes blink {
+        @keyframes pulse {
             0%,
             100% {
                 opacity: 1;
@@ -106,31 +106,30 @@
                 opacity: 0.3;
             }
         }
-        /* --- LAYOUT --- */
+        /* --- INTERFACE PRINCIPAL --- */
         
         header {
             height: 70px;
             display: flex;
             align-items: center;
             padding: 0 40px;
-            border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid var(--border-purple);
+            background: rgba(0, 0, 0, 0.9);
             justify-content: space-between;
-            flex-shrink: 0;
             z-index: 10;
         }
         
         .brand {
             font-family: 'Cinzel';
             font-size: 1.4rem;
-            letter-spacing: 6px;
+            letter-spacing: 5px;
             color: var(--neon-purple);
-            text-shadow: var(--glow);
+            text-shadow: var(--neon-glow);
         }
         
         #main-interface {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 320px 1fr;
             height: calc(100vh - 70px);
             overflow: hidden;
             gap: 15px;
@@ -138,20 +137,19 @@
             position: relative;
             z-index: 5;
         }
-        /* PAINEL ESQUERDO: ÍNDICE */
         
         #archive-index {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(25px);
+            background: var(--glass-clean);
+            border: 1px solid var(--border-purple);
+            backdrop-filter: blur(10px);
             overflow-y: auto;
         }
         
         .index-item {
             padding: 18px 25px;
-            border-bottom: 1px solid rgba(191, 0, 255, 0.1);
-            font-size: 0.85rem;
-            color: #555;
+            border-bottom: 1px solid rgba(191, 0, 255, 0.05);
+            font-size: 0.8rem;
+            color: #444;
             transition: 0.4s;
             cursor: pointer;
         }
@@ -167,61 +165,54 @@
             background: var(--neon-purple);
             color: #000;
             font-weight: bold;
-            box-shadow: var(--glow);
+            box-shadow: var(--neon-glow);
         }
-        /* PAINEL DIREITO: VISUALIZADOR */
         
         #archive-viewer {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(40px);
-            padding: 50px;
+            background: var(--glass-clean);
+            border: 1px solid var(--border-purple);
+            backdrop-filter: blur(15px);
+            padding: 45px;
             overflow-y: auto;
             position: relative;
         }
         
-        #viewer-content {
-            opacity: 0;
-        }
-        
         #viewer-title {
             font-family: 'Cinzel';
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: var(--neon-purple);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-            text-shadow: var(--glow);
+            border-bottom: 1px solid var(--border-purple);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-shadow: var(--neon-glow);
         }
         
         #viewer-body {
-            font-size: 1.05rem;
-            line-height: 1.9;
+            font-size: 0.95rem;
+            line-height: 1.8;
             white-space: pre-wrap;
-            color: #bbb;
-            margin-bottom: 60px;
+            color: #aaa;
+            margin-bottom: 50px;
         }
-        /* BOTÕES */
+        /* --- BOTÕES & ADMIN --- */
         
         .btn-abyss {
             background: none;
-            border: 1px solid var(--border);
-            color: #888;
-            padding: 12px 25px;
+            border: 1px solid var(--border-purple);
+            color: #666;
+            padding: 10px 20px;
             font-family: inherit;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             cursor: pointer;
             transition: 0.3s;
-            text-transform: uppercase;
             letter-spacing: 2px;
         }
         
         .btn-abyss:hover {
             border-color: var(--neon-purple);
             color: var(--neon-purple);
-            box-shadow: var(--glow);
+            box-shadow: var(--neon-glow);
         }
-        /* MOBILE FIX */
         
         @media (max-width: 768px) {
             #main-interface {
@@ -231,21 +222,14 @@
             .brand {
                 font-size: 1rem;
             }
-            #archive-viewer {
-                padding: 30px;
-            }
-            #viewer-title {
-                font-size: 1.6rem;
-            }
         }
-        /* MODAIS ADMIN */
         
         #secret-door {
             position: fixed;
             bottom: 10px;
             right: 10px;
             font-size: 0.5rem;
-            color: #080808;
+            color: #050505;
             z-index: 10001;
             cursor: pointer;
         }
@@ -258,7 +242,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(50px);
+            backdrop-filter: blur(40px);
         }
         
         .terminal {
@@ -267,7 +251,7 @@
             border: 1px solid var(--neon-purple);
             padding: 40px;
             background: #000;
-            box-shadow: var(--glow);
+            box-shadow: var(--neon-glow);
         }
         
         input,
@@ -290,7 +274,6 @@
             color: #000;
             font-weight: bold;
             cursor: pointer;
-            letter-spacing: 3px;
         }
         
         .hidden {
@@ -306,69 +289,67 @@
     <div id="cursor"></div>
 
     <div id="loader">
-        <div class="loader-msg">[ SINCRONIZANDO_NUCLEO_V5.0 ]</div>
-        <div style="width: 200px; height: 1px; background: #111; margin-top: 20px; position:relative; overflow:hidden;">
-            <div id="l-progress" style="width: 0%; height: 100%; background: var(--neon-purple); box-shadow: var(--glow);"></div>
+        <div class="loader-txt">[ SINCRONIZANDO_ABISMO_V5.2 ]</div>
+        <div style="width: 180px; height: 1px; background: #111; margin-top: 20px; position:relative; overflow:hidden;">
+            <div id="l-progress" style="width: 0%; height: 100%; background: var(--neon-purple); box-shadow: var(--neon-glow);"></div>
         </div>
     </div>
 
     <header>
         <div class="brand">NEURAL_ARCHIVE // HARLEY</div>
-        <div id="sys-status" style="font-size: 0.6rem; color: #222;">// SYSTEM_STATUS: ONLINE</div>
+        <div id="sys-status" style="font-size: 0.5rem; color: #1a1a1a;">// STATUS: ENCRYPTED</div>
     </header>
 
     <section id="main-interface">
         <aside id="archive-index"></aside>
         <main id="archive-viewer">
-            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111; font-size:0.8rem; letter-spacing:10px;">// VOID_EMPTY //</div>
-            <div id="viewer-content">
+            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#0a0a0a; font-size:0.7rem; letter-spacing:8px;">// VOID_AWAITING //</div>
+            <div id="viewer-content" style="opacity:0;">
                 <div id="viewer-title"></div>
                 <div id="viewer-body"></div>
                 <div style="display:flex; gap:15px;">
-                    <button class="btn-abyss" id="audio-toggle" onclick="handleAudio()">[ ▶ AUDIO_INIT ]</button>
+                    <button class="btn-abyss" onclick="handleAudio()">[ ▶ AUDIO_START ]</button>
                     <button class="btn-abyss hidden" id="del-btn" style="border-color:#4a0000; color:#4a0000;">[ X DELETE ]</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="secret-door" onclick="showAuth()">ERR_NULL_LINK_77</div>
+    <div id="secret-door" onclick="showAuth()">SYS_NULL_77</div>
 
     <div id="auth-modal" class="terminal-overlay">
         <div class="terminal">
-            <p style="color:var(--neon-purple); margin-bottom:25px; font-size:0.7rem;">// BIO_AUTH_REQUIRED</p>
             <input type="text" id="u-id" placeholder="OPERADOR">
-            <input type="password" id="u-key" placeholder="CHAVE_DE_ACESSO">
-            <button class="btn-confirm" onclick="verifyAdmin()">DESBLOQUEAR</button>
+            <input type="password" id="u-key" placeholder="CHAVE">
+            <button class="btn-confirm" onclick="verifyAdmin()">ACCESS</button>
         </div>
     </div>
 
     <div id="inject-modal" class="terminal-overlay">
         <div class="terminal">
-            <p style="color:var(--neon-purple); margin-bottom:20px; font-size:0.7rem;">// INJETAR_DADOS_ABISSAIS</p>
             <input type="text" id="p-title" placeholder="TÍTULO">
-            <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
-            <textarea id="p-content" rows="10" placeholder="DEPOSITE_SEUS_VERSOS..."></textarea>
-            <input type="color" id="p-color" value="#bf00ff" style="height:40px; cursor:pointer;">
-            <button class="btn-confirm" onclick="injectData()">EXECUTAR_INJEÇÃO</button>
-            <button onclick="closeModals()" style="background:none; border:none; color:#333; margin-top:15px; cursor:pointer; width:100%; font-size:0.6rem;">[ CANCELAR ]</button>
+            <input type="text" id="p-yt" placeholder="YT_ID">
+            <textarea id="p-content" rows="10" placeholder="VERSOS..."></textarea>
+            <input type="color" id="p-color" value="#bf00ff" style="height:35px;">
+            <button class="btn-confirm" onclick="injectData()">INJETAR</button>
+            <button onclick="closeModals()" style="background:none; border:none; color:#333; margin-top:15px; cursor:pointer; width:100%; font-size:0.5rem;">[ SAIR ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- CONFIGURAÇÃO DO NÚCLEO (V5 - SEM CONFLITOS) ---
+        // --- NUCLEO_V5.2 (VARIAVEL UNICA) ---
         const $void_core = supabase.createClient(
             "https://kwapzpyijgeiobcvqtoj.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
         );
 
         let archiveData = [];
-        let selectedFragment = null;
         let isOperator = false;
+        let selectedFragment = null;
 
-        // --- PARTÍCULAS DE ABISSO (CANVAS) ---
+        // --- PARTÍCULAS NEON ---
         const canvas = document.getElementById('abyss-particles');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -378,9 +359,9 @@
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5;
-                this.speedX = Math.random() * 0.4 - 0.2;
-                this.speedY = Math.random() * 0.4 - 0.2;
+                this.size = Math.random() * 1.2;
+                this.speedX = Math.random() * 0.3 - 0.15;
+                this.speedY = Math.random() * 0.3 - 0.15;
             }
             update() {
                 this.x += this.speedX;
@@ -397,7 +378,7 @@
                 ctx.fill();
             }
         }
-        for (let i = 0; i < 150; i++) pArray.push(new Particle());
+        for (let i = 0; i < 120; i++) pArray.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -409,22 +390,11 @@
         }
         animate();
 
-        // --- SISTEMA DE CARREGAMENTO ---
-        function closeLoader() {
-            gsap.to("#loader", {
-                opacity: 0,
-                duration: 1,
-                delay: 0.5,
-                onComplete: () => {
-                    document.getElementById('loader').style.display = 'none';
-                }
-            });
-        }
-
+        // --- LOADER FAILSAFE ---
         document.addEventListener('DOMContentLoaded', async() => {
             gsap.to("#l-progress", {
                 width: "100%",
-                duration: 3
+                duration: 2.5
             });
             try {
                 const {
@@ -438,7 +408,12 @@
                 }
                 await refreshArchive();
             } finally {
-                closeLoader();
+                gsap.to("#loader", {
+                    opacity: 0,
+                    duration: 0.8,
+                    delay: 0.5,
+                    onComplete: () => document.getElementById('loader').style.display = 'none'
+                });
             }
         });
 
@@ -455,10 +430,9 @@
         }
 
         function renderIndex() {
-            const index = document.getElementById('archive-index');
-            index.innerHTML = archiveData.map((p, i) => `
+            document.getElementById('archive-index').innerHTML = archiveData.map((p, i) => `
                 <div class="index-item" onclick="viewFragment('${p.id}', this)" style="border-left: 3px solid ${p.mood_color}">
-                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[${i.toString().padStart(3, '0')}]</span>
+                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[${i}]</span>
                 </div>
             `).join('');
         }
@@ -484,20 +458,20 @@
                 if (charIndex < text.length) {
                     body.innerHTML += text.charAt(charIndex);
                     charIndex++;
-                    setTimeout(typewriter, 15);
+                    setTimeout(typewriter, 12);
                 }
             }
             typewriter();
             gsap.to(viewer, {
                 opacity: 1,
-                duration: 0.5
+                duration: 0.4
             });
 
             if (isOperator) {
                 const d = document.getElementById('del-btn');
                 d.classList.remove('hidden');
                 d.onclick = async() => {
-                    if (confirm("REMOVER_DADOS?")) {
+                    if (confirm("REMOVER?")) {
                         await $void_core.from('poems').delete().eq('id', id);
                         location.reload();
                     }
@@ -505,7 +479,7 @@
             }
         }
 
-        // --- INTERAÇÕES ---
+        // --- ADMIN & AUTH ---
         window.addEventListener('mousemove', (e) => {
             gsap.to("#cursor", {
                 x: e.clientX,
@@ -521,7 +495,6 @@
         function closeModals() {
             document.querySelectorAll('.terminal-overlay').forEach(m => m.style.display = 'none');
         }
-
         async function verifyAdmin() {
             const u = document.getElementById('u-id').value;
             const k = document.getElementById('u-key').value;
@@ -533,7 +506,6 @@
                 location.reload();
             }
         }
-
         async function injectData() {
             const t = document.getElementById('p-title').value;
             const c = document.getElementById('p-content').value;
@@ -561,14 +533,11 @@
 
         function handleAudio() {
             if (!selectedFragment || !player) return;
-            const btn = document.getElementById('audio-toggle');
             if (isPlaying) {
                 player.pauseVideo();
-                btn.innerText = "[ ▶ AUDIO_RESUME ]";
             } else {
                 player.loadVideoById(selectedFragment.yt_id);
                 player.playVideo();
-                btn.innerText = "[ ■ AUDIO_STOP ]";
             }
             isPlaying = !isPlaying;
         }
