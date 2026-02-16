@@ -34,7 +34,7 @@
             height: 100vh;
             width: 100vw;
         }
-        /* --- Overlay de Imersão CRT --- */
+        /* --- Overlay de Imersão --- */
         
         .crt::before {
             content: " ";
@@ -46,13 +46,28 @@
             background-size: 100% 3px, 2px 100%;
             opacity: 0.3;
         }
+        /* --- LOADER (CORRIGIDO) --- */
         
-        .vignette {
+        #loader {
             position: fixed;
             inset: 0;
-            z-index: 9998;
+            background: #000;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.9) 150%);
+            /* Impede cliques durante o loading */
+            user-select: none;
+            /* Impede selecionar o texto */
+        }
+        
+        #loader-status {
+            color: var(--accent);
+            font-size: 0.8rem;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px var(--accent);
         }
         /* --- Cursor Magnético --- */
         
@@ -66,23 +81,11 @@
             pointer-events: none;
             box-shadow: 0 0 15px var(--accent);
         }
-        /* --- UI de Sistema --- */
-        
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 10001;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+        /* --- Header & Grid --- */
         
         header {
             padding: 60px;
             text-align: center;
-            position: relative;
         }
         
         .glitch-title {
@@ -101,7 +104,7 @@
             max-width: 1400px;
             margin: 0 auto;
             overflow-y: auto;
-            height: 60vh;
+            height: 65vh;
         }
         
         .poem-card {
@@ -117,11 +120,12 @@
         .poem-card:hover {
             border-color: var(--accent);
             transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(255, 60, 60, 0.1);
         }
-        /* --- Terminal de Injeção (Admin) --- */
+        /* --- Terminal e Modais --- */
         
-        #admin-panel {
+        #admin-panel,
+        #auth-overlay,
+        #poem-modal {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.98);
@@ -137,7 +141,6 @@
             border: 1px solid var(--accent);
             padding: 40px;
             background: #000;
-            position: relative;
         }
         
         input,
@@ -160,102 +163,59 @@
             color: var(--accent);
             font-weight: bold;
             cursor: pointer;
-            letter-spacing: 3px;
-        }
-        
-        .inject-btn:hover {
-            background: var(--accent);
-            color: #000;
         }
         
         .hidden {
             display: none !important;
-        }
-        /* --- Modal de Decodificação --- */
-        
-        #poem-modal {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 9500;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px;
-        }
-        
-        .decrypt-text {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            max-width: 800px;
-            color: #bbb;
         }
     </style>
 </head>
 
 <body class="crt">
 
-    <div class="vignette"></div>
     <div id="cursor"></div>
 
     <div id="loader">
-        <div id="loader-status" style="color: var(--accent); font-size: 0.8rem; letter-spacing: 5px;">[ INICIALIZANDO_NUCLEO ]</div>
+        <div id="loader-status">[ INICIALIZANDO_NUCLEO ]</div>
         <div style="width: 200px; height: 2px; background: #111; margin-top: 20px;">
             <div id="loader-bar" style="width: 0%; height: 100%; background: var(--accent);"></div>
         </div>
     </div>
 
     <header>
-        <div style="position:absolute; top:20px; left:20px; font-size:0.6rem; color:#333;">
-            ESTADO: <span style="color:green">ESTÁVEL</span> | SINC_GIT: <span id="git-status">OK</span>
-        </div>
         <h1 class="glitch-title">VOID_ARCHIVE</h1>
-        <button onclick="toggleAuth()" style="margin-top:20px; background:none; border:1px solid #222; color:#333; padding:5px 15px; font-size:0.6rem;">// ACESSAR_TERMINAL_DE_INJEÇÃO</button>
+        <button onclick="toggleAuth()" style="margin-top:20px; background:none; border:1px solid #222; color:#333; padding:5px 15px; font-size:0.6rem; cursor: pointer;">// ACESSAR_TERMINAL</button>
     </header>
 
     <main id="poetry-grid"></main>
 
-    <div id="auth-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:9100; display:flex; align-items:center; justify-content:center;">
+    <div id="auth-overlay" class="hidden">
         <div class="terminal-interface" style="max-width:400px;">
-            <h2 style="font-size:0.8rem; margin-bottom:20px; color:var(--accent);">IDENTIFICAÇÃO_BIOMÉTRICA_REQUERIDA</h2>
+            <h2 style="font-size:0.8rem; margin-bottom:20px; color:var(--accent);">IDENTIFICAÇÃO_REQUERIDA</h2>
             <input type="email" id="email" placeholder="EMAIL_OPERADOR">
             <input type="password" id="pass" placeholder="CHAVE_DE_ACESSO">
-            <button class="inject-btn" onclick="signIn()">VERIFICAR_IDENTIDADE</button>
-            <button onclick="toggleAuth()" style="margin-top:10px; background:none; border:none; color:#444; width:100%; font-size:0.6rem;">[ ABORTAR ]</button>
+            <button class="inject-btn" onclick="signIn()">VERIFICAR</button>
         </div>
     </div>
 
     <div id="admin-panel">
         <div class="terminal-interface">
-            <h2 style="font-size:1rem; color:var(--accent); margin-bottom:20px;">PROTOCOLO_DE_INJEÇÃO_DE_DADOS_V2</h2>
-            <input type="text" id="p-title" placeholder="TÍTULO_DO_FRAGMENTO">
-            <input type="text" id="p-yt" placeholder="ID_DO_YOUTUBE (SOUNDTRACK)">
-            <textarea id="p-content" rows="8" placeholder="VERSOS_DA_POESIA"></textarea>
-            <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
-                <label style="font-size:0.7rem; color:var(--accent)">COR_DO_MOOD:</label>
-                <input type="color" id="p-color" value="#ff3c3c" style="width:100px; height:40px; padding:0; border:none;">
-            </div>
-            <button class="inject-btn" onclick="injectPoem()">EXECUTAR_INJEÇÃO_NO_ABISMO</button>
-            <div id="terminal-logs" style="margin-top:15px; font-size:0.6rem; color:#444;">> Aguardando entrada de dados...</div>
-            <button onclick="closeAdmin()" style="margin-top:20px; background:none; border:none; color:#333;">[ ENCERRAR_SESSÃO ]</button>
-        </div>
-    </div>
-
-    <div id="poem-modal">
-        <div class="modal-content">
-            <h2 id="m-title" style="font-family:'Cinzel'; font-size:3rem; color:var(--accent); margin-bottom:30px;"></h2>
-            <div id="m-body" class="decrypt-text"></div>
-            <button onclick="closePoem()" style="margin-top:50px; background:none; border:1px solid var(--accent); color:var(--accent); padding:10px 30px;">[ RETORNAR_AO_NUCLEO ]</button>
+            <h2 style="font-size:1rem; color:var(--accent); margin-bottom:20px;">PROTOCOLO_INJEÇÃO_V2</h2>
+            <input type="text" id="p-title" placeholder="TÍTULO">
+            <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
+            <textarea id="p-content" rows="8" placeholder="POESIA"></textarea>
+            <input type="color" id="p-color" value="#ff3c3c">
+            <button class="inject-btn" onclick="injectPoem()">EXECUTAR_INJEÇÃO</button>
+            <button onclick="closeAdmin()" style="margin-top:10px; background:none; border:none; color:#444; cursor:pointer;">[ FECHAR ]</button>
         </div>
     </div>
 
     <div id="yt-player" class="hidden"></div>
 
     <script>
-        // --- CONFIGURAÇÃO SUPABASE (Substitua pelos seus dados) ---
-        const SB_URL = "SUA_URL_AQUI";
-        const SB_KEY = "SUA_KEY_AQUI";
+        // --- CONFIGURAÇÃO (SUBSTITUA AQUI) ---
+        const SB_URL = "https://kwapzpyijgeiobcvqtoj.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
         const sfx = {
@@ -263,7 +223,7 @@
             startup: new Audio('https://www.soundjay.com/sci-fi/sounds/sci-fi-interface-1.mp3')
         };
 
-        // --- SISTEMA DE CURSOR & GLITCH ---
+        // --- CURSOR ---
         const cursor = document.getElementById('cursor');
         window.addEventListener('mousemove', (e) => {
             gsap.to(cursor, {
@@ -273,74 +233,74 @@
             });
         });
 
-        // Glitch randômico de sistema
-        setInterval(() => {
-            if (Math.random() > 0.99) {
-                gsap.to("body", {
-                    duration: 0.1,
-                    filter: "invert(1) contrast(3)",
-                    yoyo: true,
-                    repeat: 1
-                });
-            }
-        }, 4000);
-
-        // --- BOOT SEQUENCE ---
-        window.addEventListener('load', () => {
+        // --- SISTEMA DE CARREGAMENTO (FIXED) ---
+        function hideLoader() {
             const tl = gsap.timeline();
-            tl.to("#loader-bar", {
-                    width: "100%",
-                    duration: 2,
-                    ease: "power4.inOut"
-                })
-                .to("#loader-status", {
+            tl.to("#loader-status", {
                     text: "[ CONEXÃO_ESTABELECIDA ]",
                     duration: 0.5
                 })
                 .to("#loader", {
                     opacity: 0,
                     duration: 1,
-                    delay: 0.5,
                     onComplete: () => {
                         document.getElementById('loader').style.display = 'none';
-                        fetchArchive();
+                        document.body.style.overflow = 'auto';
                     }
                 });
+        }
+
+        // Failsafe: Se em 5 segundos não carregar, ele força a entrada
+        setTimeout(() => {
+            if (document.getElementById('loader').style.display !== 'none') {
+                console.warn("Failsafe: Forçando ocultação do loader.");
+                hideLoader();
+            }
+        }, 5000);
+
+        // Inicialização Principal
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.to("#loader-bar", {
+                width: "100%",
+                duration: 2,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    fetchArchive();
+                }
+            });
         });
 
-        // --- NÚCLEO DE DADOS ---
         async function fetchArchive() {
-            const {
-                data
-            } = await supabaseClient.from('poems').select('*').order('created_at', {
-                ascending: false
-            });
-            if (data) renderGrid(data);
+            try {
+                const {
+                    data,
+                    error
+                } = await supabaseClient.from('poems').select('*').order('created_at', {
+                    ascending: false
+                });
+                if (data) renderGrid(data);
+                hideLoader();
+            } catch (e) {
+                console.error("Erro Supabase:", e);
+                hideLoader(); // Mesmo com erro, entra no site
+            }
         }
 
         function renderGrid(poems) {
             const grid = document.getElementById('poetry-grid');
-            grid.innerHTML = poems.map((p, i) => `
-                <article class="poem-card" style="border-left: 4px solid ${p.mood_color}" onclick="openPoem('${p.id}')">
-                    <h3 style="color:${p.mood_color}; margin-bottom:15px; font-size:1.2rem;">${p.title}</h3>
-                    <p style="font-size:0.7rem; opacity:0.5; line-height:1.5;">${p.content.substring(0, 80)}...</p>
+            grid.innerHTML = poems.map(p => `
+                <article class="poem-card" style="border-left: 4px solid ${p.mood_color}">
+                    <h3 style="color:${p.mood_color}">${p.title}</h3>
+                    <p style="font-size:0.7rem; opacity:0.5;">${p.content.substring(0, 80)}...</p>
                 </article>
             `).join('');
-            gsap.from(".poem-card", {
-                opacity: 0,
-                y: 30,
-                stagger: 0.1,
-                duration: 0.8
-            });
         }
 
-        // --- ADMIN & INJEÇÃO ---
+        // --- FUNÇÕES DE ADMIN ---
         function toggleAuth() {
-            document.getElementById('auth-overlay').classList.toggle('hidden');
-        }
-
-        function closeAdmin() {
-            document.getElementById('admin-panel').style.display = 'none';
+            const auth = document.getElementById('auth-overlay');
+            auth.classList.toggle('hidden');
+            auth.style.display = auth.classList.contains('hidden') ? 'none' : 'flex';
         }
 
         async function signIn() {
@@ -354,79 +314,18 @@
             });
             if (!error) {
                 document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'flex';
                 sfx.startup.play();
             } else {
-                alert("ACESSO_NEGADO: CREDENCIAIS_INVALIDAS");
+                alert("ACESSO NEGADO");
             }
         }
 
-        async function injectPoem() {
-            const title = document.getElementById('p-title').value;
-            const yt_id = document.getElementById('p-yt').value;
-            const content = document.getElementById('p-content').value;
-            const mood_color = document.getElementById('p-color').value;
-            const log = document.getElementById('terminal-logs');
-
-            log.innerText = "> Iniciando transferência de pacotes...";
-            const {
-                error
-            } = await supabaseClient.from('poems').insert([{
-                title,
-                content,
-                yt_id,
-                mood_color
-            }]);
-
-            if (!error) {
-                log.innerText = "> SUCESSO: Fragmento arquivado no abismo.";
-                setTimeout(() => location.reload(), 1200);
-            } else {
-                log.innerText = "> ERRO_CRÍTICO: Falha na integridade da conexão.";
-            }
-        }
-
-        // --- LEITURA & DECODIFICAÇÃO ---
-        async function openPoem(id) {
-            const {
-                data
-            } = await supabaseClient.from('poems').select('*').eq('id', id).single();
-            if (data) {
-                document.getElementById('poem-modal').style.display = 'flex';
-                document.getElementById('m-title').innerText = data.title;
-                document.documentElement.style.setProperty('--accent', data.mood_color);
-
-                // Descriptografia em tempo real
-                gsap.to("#m-body", {
-                    duration: 1.5,
-                    text: data.content,
-                    ease: "none"
-                });
-
-                if (player && data.yt_id) {
-                    player.loadVideoById(data.yt_id);
-                    player.playVideo();
-                }
-            }
-        }
-
-        function closePoem() {
-            document.getElementById('poem-modal').style.display = 'none';
-            if (player) player.stopVideo();
-        }
-
-        // --- YOUTUBE API ---
-        let player;
-
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('yt-player', {
-                height: '0',
-                width: '0',
-                videoId: ''
-            });
+        function closeAdmin() {
+            document.getElementById('admin-panel').style.display = 'none';
         }
     </script>
-    <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 
 </html>
