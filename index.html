@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL_ARCHIVE // V6.0_OVERDRIVE</title>
+    <title>NEURAL_ARCHIVE // V6.1_SUPERNOVA</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -14,12 +14,11 @@
          :root {
             --neon: #bf00ff;
             --bg-pure: #000000;
-            --glass-v6: rgba(15, 0, 25, 0.4);
-            /* Transparência equilibrada */
-            --border: rgba(191, 0, 255, 0.5);
-            --glow: 0 0 15px var(--neon), 0 0 30px rgba(191, 0, 255, 0.2);
+            --glass-v6: rgba(20, 0, 35, 0.4);
+            --border-bright: rgba(191, 0, 255, 0.8);
+            /* Borda muito mais visível */
+            --glow-strong: 0 0 20px var(--neon), 0 0 40px rgba(191, 0, 255, 0.4);
         }
-        /* --- ESTRUTURA BASE --- */
         
         * {
             margin: 0;
@@ -37,13 +36,14 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- EFEITOS VISUAIS (FIXED) --- */
+        /* --- FX VISUAIS CALIBRADOS PARA BRILHO --- */
         
         #canvas-abyss {
             position: fixed;
             inset: 0;
             z-index: 1;
             pointer-events: none;
+            filter: blur(1px);
         }
         
         .vignette {
@@ -51,7 +51,8 @@
             inset: 0;
             z-index: 9997;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 20%, #000 150%);
+            background: radial-gradient(circle, transparent 40%, #000 130%);
+            opacity: 0.8;
         }
         
         .scanlines {
@@ -59,8 +60,8 @@
             inset: 0;
             z-index: 9998;
             pointer-events: none;
-            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(0, 0, 0, 0.5) 2px);
-            opacity: 0.15;
+            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(191, 0, 255, 0.03) 2px);
+            opacity: 0.2;
         }
         
         #cursor {
@@ -71,7 +72,7 @@
             border-radius: 50%;
             z-index: 11000;
             pointer-events: none;
-            box-shadow: var(--glow);
+            box-shadow: var(--glow-strong);
             mix-blend-mode: screen;
         }
         /* --- LOADER --- */
@@ -89,70 +90,68 @@
         
         .loader-tag {
             color: var(--neon);
-            font-size: 0.7rem;
-            letter-spacing: 10px;
-            text-shadow: var(--glow);
-            animation: glitch 2s infinite;
+            font-size: 0.8rem;
+            letter-spacing: 12px;
+            text-shadow: var(--glow-strong);
+            animation: l-pulse 1s infinite alternate;
         }
         
-        @keyframes glitch {
-            0%,
-            100% {
-                transform: skew(0deg);
+        @keyframes l-pulse {
+            from {
+                opacity: 0.4;
             }
-            20% {
-                transform: skew(10deg);
-                color: #fff;
-            }
-            40% {
-                transform: skew(-10deg);
-                color: var(--neon);
+            to {
+                opacity: 1;
+                transform: scale(1.05);
             }
         }
-        /* --- LAYOUT HARLEY V6 --- */
+        /* --- HEADER --- */
         
         header {
-            height: 75px;
+            height: 70px;
             display: flex;
             align-items: center;
             padding: 0 30px;
-            border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid var(--border-bright);
+            background: rgba(0, 0, 0, 0.95);
             justify-content: space-between;
             z-index: 10;
+            box-shadow: 0 5px 20px rgba(191, 0, 255, 0.1);
         }
         
         .brand {
             font-family: 'Cinzel';
-            font-size: 1.5rem;
-            letter-spacing: 5px;
+            font-size: 1.6rem;
+            letter-spacing: 8px;
             color: var(--neon);
-            text-shadow: var(--glow);
+            text-shadow: var(--glow-strong);
         }
         
         #main-interface {
             display: grid;
-            grid-template-columns: 330px 1fr;
-            height: calc(100vh - 75px);
+            grid-template-columns: 320px 1fr;
+            height: calc(100vh - 70px);
             overflow: hidden;
-            gap: 15px;
-            padding: 15px;
+            gap: 20px;
+            padding: 20px;
             position: relative;
             z-index: 5;
         }
+        /* --- PAINEL ESQUERDO (AUMENTADO O CONTRASTE) --- */
         
         #archive-list {
             background: var(--glass-v6);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-bright);
+            backdrop-filter: blur(10px);
             overflow-y: auto;
+            box-shadow: inset 0 0 20px rgba(191, 0, 255, 0.1);
         }
         
         .list-item {
-            padding: 20px;
-            border-bottom: 1px solid rgba(191, 0, 255, 0.1);
-            font-size: 0.8rem;
-            color: #555;
+            padding: 22px;
+            border-bottom: 1px solid rgba(191, 0, 255, 0.2);
+            font-size: 0.85rem;
+            color: #666;
             transition: 0.3s;
             cursor: pointer;
         }
@@ -160,67 +159,70 @@
         .list-item:hover {
             color: #fff;
             background: rgba(191, 0, 255, 0.1);
+            text-shadow: 0 0 10px var(--neon);
             padding-left: 30px;
-            text-shadow: var(--glow);
         }
         
         .list-item.active {
             background: var(--neon);
             color: #000;
             font-weight: bold;
-            box-shadow: var(--glow);
+            box-shadow: var(--glow-strong);
         }
+        /* --- PAINEL DIREITO --- */
         
         #viewer {
             background: var(--glass-v6);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-bright);
+            backdrop-filter: blur(15px);
             padding: 50px;
             overflow-y: auto;
+            box-shadow: inset 0 0 30px rgba(191, 0, 255, 0.05);
         }
         
         #v-title {
             font-family: 'Cinzel';
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             color: var(--neon);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border-bright);
             padding-bottom: 15px;
             margin-bottom: 30px;
-            text-shadow: var(--glow);
+            text-shadow: var(--glow-strong);
         }
         
         #v-body {
-            font-size: 1rem;
-            line-height: 1.8;
+            font-size: 1.1rem;
+            line-height: 2;
             white-space: pre-wrap;
-            color: #eee;
-            margin-bottom: 50px;
+            color: #efefef;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
         }
-        /* --- ADMIN & BTNS --- */
+        /* --- BTNS & ADMIN --- */
         
         .btn-void {
             background: none;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-bright);
             color: var(--neon);
-            padding: 10px 20px;
-            font-size: 0.6rem;
+            padding: 12px 25px;
+            font-size: 0.7rem;
             cursor: pointer;
             transition: 0.3s;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
         }
         
         .btn-void:hover {
             background: var(--neon);
             color: #000;
-            box-shadow: var(--glow);
+            box-shadow: var(--glow-strong);
         }
         
         #secret-access {
             position: fixed;
-            bottom: 10px;
-            right: 10px;
-            font-size: 0.5rem;
-            color: #080808;
+            bottom: 15px;
+            right: 15px;
+            font-size: 0.6rem;
+            color: #1a1a1a;
             z-index: 10001;
             cursor: pointer;
         }
@@ -228,33 +230,34 @@
         .modal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.98);
             z-index: 10500;
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(40px);
+            backdrop-filter: blur(30px);
         }
         
         .terminal {
             width: 90%;
             max-width: 500px;
-            border: 1px solid var(--neon);
+            border: 2px solid var(--neon);
             padding: 40px;
             background: #000;
-            box-shadow: var(--glow);
+            box-shadow: var(--glow-strong);
         }
         
         input,
         textarea {
             width: 100%;
-            background: #050505;
-            border: 1px solid #1a1a1a;
-            padding: 15px;
+            background: #080808;
+            border: 1px solid #333;
+            padding: 18px;
             color: var(--neon);
             font-family: inherit;
             margin-bottom: 15px;
             outline: none;
+            font-size: 0.9rem;
         }
         
         .hidden {
@@ -270,65 +273,65 @@
     <div id="cursor"></div>
 
     <div id="loader">
-        <div class="loader-tag">[ SINCRONIZANDO_ABISMO_V6.0 ]</div>
+        <div class="loader-tag">[ SINCRONIZANDO_HARLEY_V6.1 ]</div>
     </div>
 
     <header>
-        <div class="brand">NEURAL_ARCHIVE // HARLEY</div>
-        <div id="status-tag" style="font-size: 0.5rem; color: #1a1a1a;">// STATUS: ENCRYPTED</div>
+        <div class="brand">NEURAL_ARCHIVE</div>
+        <div id="status-tag" style="font-size: 0.6rem; color: #111;">// ENCRYPT_READY</div>
     </header>
 
     <section id="main-interface">
         <aside id="archive-list"></aside>
         <main id="viewer">
-            <div id="empty-msg" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#0a0a0a; font-size:0.8rem; letter-spacing:8px;">// VOID_EMPTY //</div>
+            <div id="empty-msg" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111; font-size:0.9rem; letter-spacing:12px; font-weight:bold;">// VOID_OFFLINE //</div>
             <div id="v-content" style="opacity:0;">
                 <div id="v-title"></div>
                 <div id="v-body"></div>
-                <div style="display:flex; gap:15px;">
-                    <button class="btn-void" onclick="handleAudio()">[ ▶ AUDIO_INIT ]</button>
-                    <button class="btn-void hidden" id="del-btn" style="border-color:#500; color:#500;">[ X DELETE ]</button>
+                <div style="display:flex; gap:20px; margin-top:50px;">
+                    <button class="btn-void" onclick="handleAudio()">[ ▶ PLAY_LINK ]</button>
+                    <button class="btn-void hidden" id="del-btn" style="border-color:#ff0000; color:#ff0000;">[ X PURGE ]</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="secret-access" onclick="showAuth()">SYS_NULL_ERROR_6</div>
+    <div id="secret-access" onclick="showAuth()">SYS_ACCESS_ERROR_0</div>
 
     <div id="auth-modal" class="modal">
         <div class="terminal">
-            <p style="color:var(--neon); margin-bottom:20px; font-size:0.7rem;">// OPERADOR_REQUERIDO</p>
-            <input type="text" id="u-id" placeholder="ID">
+            <p style="color:var(--neon); margin-bottom:20px; font-size:0.7rem;">// OPERADOR_IDENTIFIQUE-SE</p>
+            <input type="text" id="u-id" placeholder="USER">
             <input type="password" id="u-key" placeholder="PASS">
-            <button class="btn-void" style="width:100%" onclick="login()">ACESSO</button>
+            <button class="btn-void" style="width:100%" onclick="login()">AUTENTICAR</button>
         </div>
     </div>
 
     <div id="admin-modal" class="modal">
         <div class="terminal">
             <input type="text" id="p-title" placeholder="TÍTULO">
-            <input type="text" id="p-yt" placeholder="YT_ID">
-            <textarea id="p-content" rows="10" placeholder="VERSOS..."></textarea>
+            <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
+            <textarea id="p-content" rows="10" placeholder="DEPOSITE O FRAGMENTO..."></textarea>
             <input type="color" id="p-color" value="#bf00ff">
-            <button class="btn-void" style="width:100%" onclick="save()">INJETAR</button>
-            <button onclick="closeModals()" style="margin-top:10px; background:none; border:none; color:#333; cursor:pointer; width:100%; font-size:0.5rem;">[ FECHAR ]</button>
+            <button class="btn-void" style="width:100%" onclick="save()">INJETAR_DADOS</button>
+            <button onclick="closeModals()" style="margin-top:20px; background:none; border:none; color:#444; cursor:pointer; width:100%; font-size:0.6rem;">[ FECHAR ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- NUCLEO_V6 (FIXED VARIABLE) ---
-        const abyssCore = supabase.createClient(
+        // --- NUCLEO_V6.1 (NO REDECLARATION) ---
+        const voidArchiveCore = supabase.createClient(
             "https://kwapzpyijgeiobcvqtoj.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
         );
 
-        let dataArchive = [];
-        let selectedItem = null;
-        let isAuth = false;
+        let archiveData = [];
+        let selectedFragment = null;
+        let isAuthHarley = false;
 
-        // --- PARTÍCULAS ---
+        // --- PARTÍCULAS NEON ---
         const canvas = document.getElementById('canvas-abyss');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -338,7 +341,7 @@
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5;
+                this.size = Math.random() * 2;
                 this.speedX = Math.random() * 0.4 - 0.2;
                 this.speedY = Math.random() * 0.4 - 0.2;
             }
@@ -352,12 +355,14 @@
             }
             draw() {
                 ctx.fillStyle = "#bf00ff";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#bf00ff";
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
-        for (let i = 0; i < 150; i++) pArray.push(new Particle());
+        for (let i = 0; i < 100; i++) pArray.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -384,12 +389,12 @@
                     data: {
                         session
                     }
-                } = await abyssCore.auth.getSession();
+                } = await voidArchiveCore.auth.getSession();
                 if (session) {
-                    isAuth = true;
+                    isAuthHarley = true;
                     document.getElementById('status-tag').style.color = "var(--neon)";
                 }
-                await load();
+                await loadFragmentos();
             } finally {
                 gsap.to("#loader", {
                     opacity: 0,
@@ -399,62 +404,62 @@
             }
         });
 
-        async function load() {
+        async function loadFragmentos() {
             const {
                 data
-            } = await abyssCore.from('poems').select('*').order('created_at', {
+            } = await voidArchiveCore.from('poems').select('*').order('created_at', {
                 ascending: false
             });
             if (data) {
-                dataArchive = data;
-                render();
+                archiveData = data;
+                renderLista();
             }
         }
 
-        function render() {
-            document.getElementById('archive-list').innerHTML = dataArchive.map((p, i) => `
-                <div class="list-item" onclick="show('${p.id}', this)" style="border-left: 3px solid ${p.mood_color}">
-                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[${i}]</span>
+        function renderLista() {
+            document.getElementById('archive-list').innerHTML = archiveData.map((p, i) => `
+                <div class="list-item" onclick="viewFragmento('${p.id}', this)" style="border-left: 4px solid ${p.mood_color}">
+                    <span>${p.title}</span> <span style="opacity:0.3; font-size:0.6rem;">[${i.toString().padStart(3, '0')}]</span>
                 </div>
             `).join('');
         }
 
-        function show(id, el) {
+        function viewFragmento(id, el) {
             document.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            selectedItem = dataArchive.find(f => f.id === id);
+            selectedFragment = archiveData.find(f => f.id === id);
 
             document.getElementById('empty-msg').style.display = 'none';
             const v = document.getElementById('v-content');
             v.style.opacity = 0;
 
-            document.getElementById('v-title').innerText = selectedItem.title;
-            document.getElementById('v-title').style.color = selectedItem.mood_color;
+            document.getElementById('v-title').innerText = selectedFragment.title;
+            document.getElementById('v-title').style.color = selectedFragment.mood_color;
 
             const body = document.getElementById('v-body');
             body.innerHTML = "";
             let idx = 0;
-            const txt = selectedItem.content;
+            const txt = selectedFragment.content;
 
-            function type() {
+            function typewriter() {
                 if (idx < txt.length) {
                     body.innerHTML += txt.charAt(idx);
                     idx++;
-                    setTimeout(type, 10);
+                    setTimeout(typewriter, 12);
                 }
             }
-            type();
+            typewriter();
 
             gsap.to(v, {
                 opacity: 1,
                 duration: 0.5
             });
-            if (isAuth) {
+            if (isAuthHarley) {
                 const d = document.getElementById('del-btn');
                 d.classList.remove('hidden');
                 d.onclick = async() => {
-                    if (confirm("EXPURGAR?")) {
-                        await abyssCore.from('poems').delete().eq('id', id);
+                    if (confirm("EXPURGAR FRAGMENTO?")) {
+                        await voidArchiveCore.from('poems').delete().eq('id', id);
                         location.reload();
                     }
                 };
@@ -473,7 +478,7 @@
             const u = document.getElementById('u-id').value;
             const k = document.getElementById('u-key').value;
             if (u === "Harley" && k === "317100") {
-                await abyssCore.auth.signInWithPassword({
+                await voidArchiveCore.auth.signInWithPassword({
                     email: "harley@void.com",
                     password: k
                 });
@@ -485,7 +490,7 @@
             const c = document.getElementById('p-content').value;
             const y = document.getElementById('p-yt').value;
             const cl = document.getElementById('p-color').value;
-            await abyssCore.from('poems').insert([{
+            await voidArchiveCore.from('poems').insert([{
                 title: t,
                 content: c,
                 yt_id: y,
@@ -506,11 +511,11 @@
         let isPlaying = false;
 
         function handleAudio() {
-            if (!selectedItem || !player) return;
+            if (!selectedFragment || !player) return;
             if (isPlaying) {
                 player.pauseVideo();
             } else {
-                player.loadVideoById(selectedItem.yt_id);
+                player.loadVideoById(selectedFragment.yt_id);
                 player.playVideo();
             }
             isPlaying = !isPlaying;
