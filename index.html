@@ -3,30 +3,28 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VOID ARCHIVE // PROTOCOL_V3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE VOID ARCHIVE // PROTOCOL_V3.1_MOBILE</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;700&family=Cinzel:wght@900&display=swap" rel="stylesheet">
 
     <style>
          :root {
             --accent: #ff3c3c;
             --bg: #020204;
-            --glass: rgba(20, 20, 30, 0.6);
-            --border: rgba(255, 60, 60, 0.2);
-            --neon: 0 0 15px var(--accent), 0 0 30px rgba(255, 60, 60, 0.3);
+            --glass: rgba(20, 20, 30, 0.8);
+            /* Um pouco mais opaco para mobile */
+            --border: rgba(255, 60, 60, 0.3);
+            --neon: 0 0 10px var(--accent);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            cursor: none;
-            scrollbar-width: thin;
-            scrollbar-color: var(--accent) #000;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -38,46 +36,47 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- FX VISUAIS --- */
-        
-        .noise::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            opacity: 0.05;
-            background: url('https://grainy-gradients.vercel.app/noise.svg');
-        }
-        
-        .vignette {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            pointer-events: none;
-            background: radial-gradient(circle, transparent 30%, #000 150%);
-        }
+        /* --- FX VISUAIS (Desativados cursor e noise pesado no mobile para performance) --- */
         
         .scanlines {
             position: fixed;
             inset: 0;
-            z-index: 9999;
+            z-index: 9998;
             pointer-events: none;
             background: repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 0, 0, 0.1) 3px);
-            opacity: 0.5;
+            opacity: 0.3;
+        }
+        /* --- LOADER (CORRIGIDO E PRIORIZADO) --- */
+        
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 99999;
+            /* Z-index máximo */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         
-        #cursor {
-            position: fixed;
-            width: 6px;
-            height: 6px;
-            background: #fff;
-            border-radius: 50%;
-            z-index: 11000;
-            pointer-events: none;
-            box-shadow: var(--neon);
-            mix-blend-mode: difference;
+        .loader-text {
+            color: var(--accent);
+            font-size: 0.8rem;
+            letter-spacing: 5px;
+            animation: pulse 1s infinite alternate;
         }
-        /* --- LAYOUT PRINCIPAL (SPLIT SCREEN) --- */
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+                text-shadow: var(--neon);
+            }
+        }
+        /* --- LAYOUT DESKTOP PADRÃO --- */
         
         header {
             height: 80px;
@@ -85,8 +84,9 @@
             align-items: center;
             padding: 0 40px;
             border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.8);
             justify-content: space-between;
+            flex-shrink: 0;
         }
         
         .brand {
@@ -105,21 +105,20 @@
         #main-interface {
             display: grid;
             grid-template-columns: 350px 1fr;
-            /* A MÁGICA ACONTECE AQUI */
-            height: calc(100vh - 80px);
-            /* Resto da tela */
+            /* Split View */
+            height: 100%;
+            overflow: hidden;
+            /* Garante que cabe na tela */
             gap: 20px;
             padding: 20px;
         }
-        /* --- PAINEL ESQUERDO: O ÍNDICE --- */
+        /* Painel Esquerdo (Índice) */
         
         #archive-index {
             background: var(--glass);
             border: 1px solid var(--border);
             backdrop-filter: blur(20px);
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
         }
         
         .index-item {
@@ -128,58 +127,28 @@
             font-size: 0.9rem;
             color: #888;
             transition: 0.3s;
-            position: relative;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-        
-        .index-item::before {
-            content: '>';
-            margin-right: 10px;
-            opacity: 0;
-            transition: 0.3s;
-            color: var(--accent);
-        }
-        
-        .index-item:hover {
-            color: #fff;
-            background: rgba(255, 60, 60, 0.05);
-            padding-left: 25px;
-        }
-        
-        .index-item:hover::before {
-            opacity: 1;
+            cursor: pointer;
         }
         
         .index-item.active {
             background: var(--accent);
             color: #000;
             font-weight: bold;
-            border-color: var(--accent);
-            box-shadow: var(--neon);
         }
-        
-        .index-item.active::before {
-            content: '[LOADED]';
-            color: #000;
-            opacity: 1;
-            font-size: 0.7rem;
-            margin-right: 5px;
-        }
-        /* --- PAINEL DIREITO: O VISUALIZADOR --- */
+        /* Painel Direito (Visualizador) */
         
         #archive-viewer {
             background: var(--glass);
             border: 1px solid var(--border);
             backdrop-filter: blur(30px);
-            padding: 50px;
+            padding: 40px;
             overflow-y: auto;
             position: relative;
             display: flex;
             flex-direction: column;
         }
-        /* Estado Vazio */
         
         #empty-state {
             position: absolute;
@@ -187,248 +156,222 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            color: #333;
-            font-size: 0.8rem;
+            opacity: 0.5;
             letter-spacing: 2px;
         }
-        /* Conteúdo do Poema */
         
         #viewer-content {
             opacity: 0;
-            /* Escondido até carregar */
+            transition: opacity 0.5s;
         }
         
         #viewer-title {
             font-family: 'Cinzel';
             font-size: 2.5rem;
             color: var(--accent);
-            text-shadow: var(--neon);
             margin-bottom: 20px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
         }
         
         #viewer-body {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #eee;
+            font-size: 1rem;
+            line-height: 1.7;
             white-space: pre-wrap;
-            /* PRESERVA INDENTAÇÃO */
-            margin-bottom: 40px;
-        }
-        
-        #viewer-controls {
-            margin-top: auto;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-            display: flex;
-            gap: 20px;
-            align-items: center;
+            margin-bottom: 30px;
         }
         
         .control-btn {
             background: none;
-            border: 1px solid #333;
-            color: #555;
-            padding: 10px 20px;
+            border: 1px solid var(--border);
+            color: #888;
+            padding: 15px;
+            width: 100%;
             font-family: inherit;
-            font-size: 0.7rem;
-            transition: 0.3s;
+            font-size: 0.8rem;
+            margin-top: 10px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            transition: 0.3s;
         }
         
         .control-btn:hover {
             border-color: var(--accent);
             color: var(--accent);
         }
+        /* --- ADAPTAÇÃO MOBILE (O Segredo) --- */
         
-        .control-btn.delete:hover {
-            background: var(--accent);
-            color: #000;
-            border-color: var(--accent);
-            box-shadow: var(--neon);
+        @media (max-width: 768px) {
+            /* Ajuste de Header */
+            header {
+                height: 60px;
+                padding: 0 15px;
+            }
+            .brand {
+                font-size: 1.1rem;
+                letter-spacing: 2px;
+            }
+            .status {
+                display: none;
+            }
+            /* Esconde status pra economizar espaço */
+            /* Layout Vertical: Índice em cima, Leitor embaixo */
+            #main-interface {
+                grid-template-columns: 1fr;
+                /* Uma coluna */
+                grid-template-rows: 35% 1fr;
+                /* 35% para lista, resto para leitura */
+                gap: 10px;
+                padding: 10px;
+            }
+            /* Ajustes de Painéis para Mobile */
+            #archive-index {
+                font-size: 0.8rem;
+            }
+            .index-item {
+                padding: 12px 15px;
+            }
+            #archive-viewer {
+                padding: 20px;
+            }
+            #viewer-title {
+                font-size: 1.5rem;
+            }
+            #viewer-body {
+                font-size: 0.9rem;
+            }
+            /* Ajuste dos Modais */
+            .terminal {
+                width: 95% !important;
+                padding: 25px !important;
+            }
+            #secret-door {
+                bottom: 5px;
+                right: 5px;
+                font-size: 0.5rem;
+                padding: 10px;
+            }
+            /* Área de toque maior */
         }
-        /* --- Terminais Ocultos (Admin) --- */
+        /* --- Terminais Ocultos --- */
         
         #secret-door {
             position: fixed;
-            bottom: 10px;
-            right: 10px;
+            bottom: 15px;
+            right: 15px;
             font-size: 0.6rem;
-            color: #333;
+            color: #555;
             z-index: 10001;
-            opacity: 0.5;
+            cursor: pointer;
         }
         
         #admin-modal,
         #login-modal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.98);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 10500;
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(50px);
+            backdrop-filter: blur(10px);
         }
         
         .terminal {
             width: 90%;
-            max-width: 600px;
+            max-width: 500px;
             border: 1px solid var(--accent);
             padding: 40px;
-            background: #000;
-            box-shadow: var(--neon);
+            background: #050505;
         }
         
         input,
         textarea {
             width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #222;
+            background: #111;
+            border: 1px solid #333;
             padding: 15px;
             color: var(--accent);
             font-family: inherit;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             outline: none;
         }
         
         .btn {
             width: 100%;
-            padding: 20px;
-            background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        
-        .btn:hover {
+            padding: 15px;
             background: var(--accent);
+            border: none;
             color: #000;
-            box-shadow: var(--neon);
-        }
-        
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 20000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-weight: bold;
         }
         
         .hidden {
             display: none !important;
         }
-        /* Responsividade para Celular */
-        
-        @media (max-width: 768px) {
-            #main-interface {
-                grid-template-columns: 1fr;
-                grid-template-rows: 200px 1fr;
-            }
-            header {
-                padding: 0 20px;
-            }
-            .brand {
-                font-size: 1rem;
-            }
-        }
     </style>
 </head>
 
-<body class="noise">
+<body>
     <div class="scanlines"></div>
-    <div class="vignette"></div>
-    <div id="cursor"></div>
 
     <div id="loader">
-        <div style="color:var(--accent); font-size:0.8rem; letter-spacing:5px;">[ REESTRUTURANDO_NÚCLEO ]</div>
+        <div class="loader-text">[ CARREGANDO PROTOCOLO V3.1... ]</div>
     </div>
 
     <header>
-        <div class="brand">VOID_ARCHIVE // V3</div>
-        <div class="status" id="sys-status">STATUS: AGUARDANDO SINC.</div>
+        <div class="brand">VOID_ARCHIVE // MOBILE</div>
+        <div class="status" id="sys-status">STATUS: AGUARDANDO</div>
     </header>
 
     <section id="main-interface">
-        <aside id="archive-index">
-        </aside>
-
+        <aside id="archive-index"></aside>
         <main id="archive-viewer">
-            <div id="empty-state">
-                <p>// NENHUM DADO SELECIONADO</p>
-                <p style="opacity: 0.5; margin-top: 10px;">Selecione um fragmento no índice lateral.</p>
-            </div>
-
+            <div id="empty-state">// SELECIONE UM FRAGMENTO //</div>
             <div id="viewer-content">
-                <div id="viewer-title">
-                    <span id="v-title-text"></span>
-                    <span id="v-mood-indicator" style="font-size:0.8rem; opacity:0.5;"></span>
-                </div>
+                <div id="viewer-title"></div>
                 <div id="viewer-body"></div>
-
                 <div id="viewer-controls">
-                    <button class="control-btn" id="play-btn" onclick="toggleAudio()">
-                        [ ▶ INICIAR ÁUDIO ]
-                    </button>
-                    <button class="control-btn delete hidden" id="delete-btn">
-                        [ X DELETAR FRAGMENTO ]
-                    </button>
+                    <button class="control-btn" id="play-btn" onclick="toggleAudio()">[ ▶ Tocar Áudio ]</button>
+                    <button class="control-btn hidden" id="delete-btn" style="border-color:red; color:red;">[ X DELETAR ]</button>
                 </div>
             </div>
         </main>
     </section>
 
     <div id="secret-door" onclick="showLogin()">SYS_ADMIN_cb77</div>
+
     <div id="login-modal">
-        <div class="terminal" style="max-width: 350px;">
-            <p style="color:var(--accent); margin-bottom:20px;">>> BIO_AUTH_HARLEY</p>
-            <input type="text" id="u-name" placeholder="OPERADOR">
-            <input type="password" id="u-pass" placeholder="CHAVE">
-            <button class="btn" onclick="authHarley()">DESBLOQUEAR</button>
+        <div class="terminal">
+            <p style="color:var(--accent); margin-bottom:20px;">>> LOGIN HARLEY</p>
+            <input type="text" id="u-name" placeholder="User">
+            <input type="password" id="u-pass" placeholder="Pass">
+            <button class="btn" onclick="authHarley()">ENTRAR</button>
+            <button class="btn" onclick="closeModals()" style="background:none; color:#555; margin-top:10px;">FECHAR</button>
         </div>
     </div>
     <div id="admin-modal">
         <div class="terminal">
-            <p style="color:var(--accent); margin-bottom:20px;">>> INJEÇÃO_DE_DADOS</p>
-            <input type="text" id="p-title" placeholder="TÍTULO">
-            <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
-            <textarea id="p-content" rows="12" placeholder="VERSOS (Indentação preservada)..."></textarea>
-            <input type="color" id="p-color" value="#ff3c3c">
+            <p style="color:var(--accent); margin-bottom:20px;">>> NOVA INJEÇÃO</p>
+            <input type="text" id="p-title" placeholder="Título">
+            <input type="text" id="p-yt" placeholder="YouTube ID">
+            <textarea id="p-content" rows="8" placeholder="Versos..."></textarea>
+            <input type="color" id="p-color" value="#ff3c3c" style="height:40px;">
             <button class="btn" onclick="savePoem()">INJETAR</button>
-            <button onclick="closeAdmin()" style="margin-top:20px; background:none; border:none; color:#555; width:100%; cursor:pointer;">[ SAIR ]</button>
+            <button class="btn" onclick="closeModals()" style="background:none; color:#555; margin-top:10px;">SAIR</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- CONFIGURAÇÃO (Coloque suas chaves aqui) ---
+        // --- CHAVES AQUI ---
         const SB_URL = "https://kwapzpyijgeiobcvqtoj.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA";
+        const SB_KEY = "SeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA";
         const supabase = supabase.createClient(SB_URL, SB_KEY);
 
         let poemsData = [];
         let currentPoem = null;
         let isAdmin = false;
-
-        // --- CORE & INIT ---
-        window.addEventListener('mousemove', (e) => {
-            gsap.to("#cursor", {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.1
-            });
-        });
 
         document.addEventListener('DOMContentLoaded', async() => {
             const {
@@ -438,8 +381,7 @@
             } = await supabase.auth.getSession();
             if (session) {
                 isAdmin = true;
-                document.getElementById('sys-status').innerText = "STATUS: OPERADOR HARLEY CONECTADO";
-                document.getElementById('sys-status').style.color = "var(--accent)";
+                document.getElementById('sys-status').innerText = "HARLEY CONECTADO";
             }
             loadArchive();
         });
@@ -454,73 +396,45 @@
                 poemsData = data;
                 renderIndex(data);
             }
+            // Loader some após carregar
             gsap.to("#loader", {
                 opacity: 0,
-                duration: 1,
+                duration: 0.5,
+                delay: 0.5,
                 onComplete: () => document.getElementById('loader').style.display = 'none'
             });
         }
 
-        // --- RENDERIZADOR DO ÍNDICE (Esquerda) ---
         function renderIndex(data) {
-            const indexContainer = document.getElementById('archive-index');
-            indexContainer.innerHTML = data.map((p, i) => `
+            document.getElementById('archive-index').innerHTML = data.map((p, i) => `
                 <div class="index-item" onclick="loadToViewer('${p.id}', this)" style="border-left: 3px solid ${p.mood_color}">
-                    <span>${p.title}</span>
-                    <span style="font-size:0.7rem; opacity:0.5;">[ID:${i.toString().padStart(3, '0')}]</span>
+                    <span>${p.title}</span> <span style="opacity:0.5;">[#${i}]</span>
                 </div>
             `).join('');
         }
 
-        // --- VISUALIZADOR (Direita) ---
         function loadToViewer(id, itemElement) {
-            // Atualiza UI do índice
             document.querySelectorAll('.index-item').forEach(el => el.classList.remove('active'));
             itemElement.classList.add('active');
+            currentPoem = poemsData.find(p => p.id === id);
 
-            const poem = poemsData.find(p => p.id === id);
-            currentPoem = poem;
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('viewer-content').style.opacity = 1;
+            document.getElementById('viewer-title').innerText = currentPoem.title;
+            document.getElementById('viewer-title').style.color = currentPoem.mood_color;
+            document.getElementById('viewer-body').innerText = currentPoem.content;
 
-            // Animação de Troca
-            const tl = gsap.timeline();
-            tl.to("#viewer-content", {
-                    opacity: 0,
-                    duration: 0.2,
-                    onComplete: () => {
-                        // Injeta os dados
-                        document.getElementById('empty-state').style.display = 'none';
-                        document.getElementById('v-title-text').innerText = poem.title;
-                        document.getElementById('v-title-text').style.color = poem.mood_color;
-                        document.getElementById('v-mood-indicator').innerText = `[ MATIZ: ${poem.mood_color} ]`;
-                        document.getElementById('viewer-body').innerText = poem.content; // innerText preserva indentação com pre-wrap
-
-                        // Configura botões
-                        document.documentElement.style.setProperty('--accent', poem.mood_color);
-                        setupControls(poem);
-
-                        // Reseta player de áudio
-                        if (player) player.stopVideo();
-                        document.getElementById('play-btn').innerText = "[ ▶ INICIAR ÁUDIO ]";
-                    }
-                })
-                .to("#viewer-content", {
-                    opacity: 1,
-                    duration: 0.5,
-                    ease: "power2.out"
-                });
-        }
-
-        function setupControls(poem) {
             const delBtn = document.getElementById('delete-btn');
             if (isAdmin) {
                 delBtn.classList.remove('hidden');
-                delBtn.onclick = () => killPoem(poem.id);
-            } else {
-                delBtn.classList.add('hidden');
+                delBtn.onclick = () => killPoem(currentPoem.id);
             }
+
+            if (player) player.stopVideo();
+            document.getElementById('play-btn').innerText = "[ ▶ Tocar Áudio ]";
+            isPlaying = false;
         }
 
-        // --- ÁUDIO & ADMIN ---
         let isPlaying = false;
 
         function toggleAudio() {
@@ -528,11 +442,11 @@
             const btn = document.getElementById('play-btn');
             if (isPlaying) {
                 player.pauseVideo();
-                btn.innerText = "[ ▶ RETOMAR ÁUDIO ]";
+                btn.innerText = "[ ▶ Retomar ]";
             } else {
                 player.loadVideoById(currentPoem.yt_id);
                 player.playVideo();
-                btn.innerText = "[ ■ PAUSAR ÁUDIO ]";
+                btn.innerText = "[ ■ Pausar ]";
             }
             isPlaying = !isPlaying;
         }
@@ -541,7 +455,8 @@
             document.getElementById('login-modal').style.display = 'flex';
         }
 
-        function closeAdmin() {
+        function closeModals() {
+            document.getElementById('login-modal').style.display = 'none';
             document.getElementById('admin-modal').style.display = 'none';
         }
 
@@ -549,13 +464,11 @@
             const user = document.getElementById('u-name').value;
             const pass = document.getElementById('u-pass').value;
             if (user === "Harley" && pass === "317100") {
-                const {
-                    error
-                } = await supabase.auth.signInWithPassword({
+                await supabase.auth.signInWithPassword({
                     email: "harley@void.com",
                     password: pass
                 });
-                if (!error) location.reload();
+                location.reload();
             }
         }
 
@@ -574,12 +487,11 @@
         }
 
         async function killPoem(id) {
-            if (confirm("CONFIRMAR DELEÇÃO DO FRAGMENTO?")) {
+            if (confirm("DELETAR?")) {
                 await supabase.from('poems').delete().eq('id', id);
                 location.reload();
             }
         }
-
         let player;
 
         function onYouTubeIframeAPIReady() {
