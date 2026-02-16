@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURAL_ARCHIVE // HARLEY_V5.2</title>
+    <title>NEURAL_ARCHIVE // V6.0_OVERDRIVE</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -12,25 +12,24 @@
 
     <style>
          :root {
-            --neon-purple: #bf00ff;
-            --bg-black: #000000;
-            --glass-clean: rgba(5, 0, 15, 0.4);
-            --border-purple: rgba(191, 0, 255, 0.3);
-            --neon-glow: 0 0 15px var(--neon-purple), 0 0 30px rgba(191, 0, 255, 0.2);
+            --neon: #bf00ff;
+            --bg-pure: #000000;
+            --glass-v6: rgba(15, 0, 25, 0.4);
+            /* Transparência equilibrada */
+            --border: rgba(191, 0, 255, 0.5);
+            --glow: 0 0 15px var(--neon), 0 0 30px rgba(191, 0, 255, 0.2);
         }
-        /* --- RESET & ESTRUTURA --- */
+        /* --- ESTRUTURA BASE --- */
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             cursor: none;
-            scrollbar-width: thin;
-            scrollbar-color: var(--neon-purple) #000;
         }
         
         body {
-            background-color: var(--bg-black) !important;
+            background-color: var(--bg-pure) !important;
             color: #fff;
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
@@ -38,14 +37,13 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- CAMADAS VISUAIS (ANTI-CINZA) --- */
+        /* --- EFEITOS VISUAIS (FIXED) --- */
         
-        #abyss-particles {
+        #canvas-abyss {
             position: fixed;
             inset: 0;
             z-index: 1;
             pointer-events: none;
-            opacity: 0.7;
         }
         
         .vignette {
@@ -53,7 +51,7 @@
             inset: 0;
             z-index: 9997;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 20%, #000 140%);
+            background: radial-gradient(circle, transparent 20%, #000 150%);
         }
         
         .scanlines {
@@ -61,19 +59,19 @@
             inset: 0;
             z-index: 9998;
             pointer-events: none;
-            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(0, 0, 0, 0.4) 2px);
+            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(0, 0, 0, 0.5) 2px);
             opacity: 0.15;
         }
         
         #cursor {
             position: fixed;
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
             background: #fff;
             border-radius: 50%;
             z-index: 11000;
             pointer-events: none;
-            box-shadow: var(--neon-glow);
+            box-shadow: var(--glow);
             mix-blend-mode: screen;
         }
         /* --- LOADER --- */
@@ -89,31 +87,36 @@
             justify-content: center;
         }
         
-        .loader-txt {
-            color: var(--neon-purple);
+        .loader-tag {
+            color: var(--neon);
             font-size: 0.7rem;
             letter-spacing: 10px;
-            text-shadow: var(--neon-glow);
-            animation: pulse 1.5s infinite;
+            text-shadow: var(--glow);
+            animation: glitch 2s infinite;
         }
         
-        @keyframes pulse {
+        @keyframes glitch {
             0%,
             100% {
-                opacity: 1;
+                transform: skew(0deg);
             }
-            50% {
-                opacity: 0.3;
+            20% {
+                transform: skew(10deg);
+                color: #fff;
+            }
+            40% {
+                transform: skew(-10deg);
+                color: var(--neon);
             }
         }
-        /* --- INTERFACE PRINCIPAL --- */
+        /* --- LAYOUT HARLEY V6 --- */
         
         header {
-            height: 70px;
+            height: 75px;
             display: flex;
             align-items: center;
-            padding: 0 40px;
-            border-bottom: 1px solid var(--border-purple);
+            padding: 0 30px;
+            border-bottom: 1px solid var(--border);
             background: rgba(0, 0, 0, 0.9);
             justify-content: space-between;
             z-index: 10;
@@ -121,16 +124,16 @@
         
         .brand {
             font-family: 'Cinzel';
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             letter-spacing: 5px;
-            color: var(--neon-purple);
-            text-shadow: var(--neon-glow);
+            color: var(--neon);
+            text-shadow: var(--glow);
         }
         
         #main-interface {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            height: calc(100vh - 70px);
+            grid-template-columns: 330px 1fr;
+            height: calc(100vh - 75px);
             overflow: hidden;
             gap: 15px;
             padding: 15px;
@@ -138,106 +141,94 @@
             z-index: 5;
         }
         
-        #archive-index {
-            background: var(--glass-clean);
-            border: 1px solid var(--border-purple);
-            backdrop-filter: blur(10px);
+        #archive-list {
+            background: var(--glass-v6);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(15px);
             overflow-y: auto;
         }
         
-        .index-item {
-            padding: 18px 25px;
-            border-bottom: 1px solid rgba(191, 0, 255, 0.05);
+        .list-item {
+            padding: 20px;
+            border-bottom: 1px solid rgba(191, 0, 255, 0.1);
             font-size: 0.8rem;
-            color: #444;
-            transition: 0.4s;
+            color: #555;
+            transition: 0.3s;
             cursor: pointer;
         }
         
-        .index-item:hover {
+        .list-item:hover {
             color: #fff;
-            background: rgba(191, 0, 255, 0.05);
-            padding-left: 35px;
-            text-shadow: 0 0 10px var(--neon-purple);
+            background: rgba(191, 0, 255, 0.1);
+            padding-left: 30px;
+            text-shadow: var(--glow);
         }
         
-        .index-item.active {
-            background: var(--neon-purple);
+        .list-item.active {
+            background: var(--neon);
             color: #000;
             font-weight: bold;
-            box-shadow: var(--neon-glow);
+            box-shadow: var(--glow);
         }
         
-        #archive-viewer {
-            background: var(--glass-clean);
-            border: 1px solid var(--border-purple);
-            backdrop-filter: blur(15px);
-            padding: 45px;
+        #viewer {
+            background: var(--glass-v6);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            padding: 50px;
             overflow-y: auto;
-            position: relative;
         }
         
-        #viewer-title {
+        #v-title {
             font-family: 'Cinzel';
-            font-size: 2.2rem;
-            color: var(--neon-purple);
-            border-bottom: 1px solid var(--border-purple);
+            font-size: 2.5rem;
+            color: var(--neon);
+            border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
-            margin-bottom: 25px;
-            text-shadow: var(--neon-glow);
+            margin-bottom: 30px;
+            text-shadow: var(--glow);
         }
         
-        #viewer-body {
-            font-size: 0.95rem;
+        #v-body {
+            font-size: 1rem;
             line-height: 1.8;
             white-space: pre-wrap;
-            color: #aaa;
+            color: #eee;
             margin-bottom: 50px;
         }
-        /* --- BOTÕES & ADMIN --- */
+        /* --- ADMIN & BTNS --- */
         
-        .btn-abyss {
+        .btn-void {
             background: none;
-            border: 1px solid var(--border-purple);
-            color: #666;
+            border: 1px solid var(--border);
+            color: var(--neon);
             padding: 10px 20px;
-            font-family: inherit;
             font-size: 0.6rem;
             cursor: pointer;
             transition: 0.3s;
             letter-spacing: 2px;
         }
         
-        .btn-abyss:hover {
-            border-color: var(--neon-purple);
-            color: var(--neon-purple);
-            box-shadow: var(--neon-glow);
+        .btn-void:hover {
+            background: var(--neon);
+            color: #000;
+            box-shadow: var(--glow);
         }
         
-        @media (max-width: 768px) {
-            #main-interface {
-                grid-template-columns: 1fr;
-                grid-template-rows: 35% 1fr;
-            }
-            .brand {
-                font-size: 1rem;
-            }
-        }
-        
-        #secret-door {
+        #secret-access {
             position: fixed;
             bottom: 10px;
             right: 10px;
             font-size: 0.5rem;
-            color: #050505;
+            color: #080808;
             z-index: 10001;
             cursor: pointer;
         }
         
-        .terminal-overlay {
+        .modal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.98);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 10500;
             display: none;
             align-items: center;
@@ -248,10 +239,10 @@
         .terminal {
             width: 90%;
             max-width: 500px;
-            border: 1px solid var(--neon-purple);
+            border: 1px solid var(--neon);
             padding: 40px;
             background: #000;
-            box-shadow: var(--neon-glow);
+            box-shadow: var(--glow);
         }
         
         input,
@@ -260,20 +251,10 @@
             background: #050505;
             border: 1px solid #1a1a1a;
             padding: 15px;
-            color: var(--neon-purple);
+            color: var(--neon);
             font-family: inherit;
             margin-bottom: 15px;
             outline: none;
-        }
-        
-        .btn-confirm {
-            width: 100%;
-            padding: 18px;
-            background: var(--neon-purple);
-            border: none;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
         }
         
         .hidden {
@@ -284,73 +265,71 @@
 
 <body class="scanlines">
 
-    <canvas id="abyss-particles"></canvas>
+    <canvas id="canvas-abyss"></canvas>
     <div class="vignette"></div>
     <div id="cursor"></div>
 
     <div id="loader">
-        <div class="loader-txt">[ SINCRONIZANDO_ABISMO_V5.2 ]</div>
-        <div style="width: 180px; height: 1px; background: #111; margin-top: 20px; position:relative; overflow:hidden;">
-            <div id="l-progress" style="width: 0%; height: 100%; background: var(--neon-purple); box-shadow: var(--neon-glow);"></div>
-        </div>
+        <div class="loader-tag">[ SINCRONIZANDO_ABISMO_V6.0 ]</div>
     </div>
 
     <header>
         <div class="brand">NEURAL_ARCHIVE // HARLEY</div>
-        <div id="sys-status" style="font-size: 0.5rem; color: #1a1a1a;">// STATUS: ENCRYPTED</div>
+        <div id="status-tag" style="font-size: 0.5rem; color: #1a1a1a;">// STATUS: ENCRYPTED</div>
     </header>
 
     <section id="main-interface">
-        <aside id="archive-index"></aside>
-        <main id="archive-viewer">
-            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#0a0a0a; font-size:0.7rem; letter-spacing:8px;">// VOID_AWAITING //</div>
-            <div id="viewer-content" style="opacity:0;">
-                <div id="viewer-title"></div>
-                <div id="viewer-body"></div>
+        <aside id="archive-list"></aside>
+        <main id="viewer">
+            <div id="empty-msg" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#0a0a0a; font-size:0.8rem; letter-spacing:8px;">// VOID_EMPTY //</div>
+            <div id="v-content" style="opacity:0;">
+                <div id="v-title"></div>
+                <div id="v-body"></div>
                 <div style="display:flex; gap:15px;">
-                    <button class="btn-abyss" onclick="handleAudio()">[ ▶ AUDIO_START ]</button>
-                    <button class="btn-abyss hidden" id="del-btn" style="border-color:#4a0000; color:#4a0000;">[ X DELETE ]</button>
+                    <button class="btn-void" onclick="handleAudio()">[ ▶ AUDIO_INIT ]</button>
+                    <button class="btn-void hidden" id="del-btn" style="border-color:#500; color:#500;">[ X DELETE ]</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="secret-door" onclick="showAuth()">SYS_NULL_77</div>
+    <div id="secret-access" onclick="showAuth()">SYS_NULL_ERROR_6</div>
 
-    <div id="auth-modal" class="terminal-overlay">
+    <div id="auth-modal" class="modal">
         <div class="terminal">
-            <input type="text" id="u-id" placeholder="OPERADOR">
-            <input type="password" id="u-key" placeholder="CHAVE">
-            <button class="btn-confirm" onclick="verifyAdmin()">ACCESS</button>
+            <p style="color:var(--neon); margin-bottom:20px; font-size:0.7rem;">// OPERADOR_REQUERIDO</p>
+            <input type="text" id="u-id" placeholder="ID">
+            <input type="password" id="u-key" placeholder="PASS">
+            <button class="btn-void" style="width:100%" onclick="login()">ACESSO</button>
         </div>
     </div>
 
-    <div id="inject-modal" class="terminal-overlay">
+    <div id="admin-modal" class="modal">
         <div class="terminal">
             <input type="text" id="p-title" placeholder="TÍTULO">
             <input type="text" id="p-yt" placeholder="YT_ID">
             <textarea id="p-content" rows="10" placeholder="VERSOS..."></textarea>
-            <input type="color" id="p-color" value="#bf00ff" style="height:35px;">
-            <button class="btn-confirm" onclick="injectData()">INJETAR</button>
-            <button onclick="closeModals()" style="background:none; border:none; color:#333; margin-top:15px; cursor:pointer; width:100%; font-size:0.5rem;">[ SAIR ]</button>
+            <input type="color" id="p-color" value="#bf00ff">
+            <button class="btn-void" style="width:100%" onclick="save()">INJETAR</button>
+            <button onclick="closeModals()" style="margin-top:10px; background:none; border:none; color:#333; cursor:pointer; width:100%; font-size:0.5rem;">[ FECHAR ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- NUCLEO_V5.2 (VARIAVEL UNICA) ---
-        const $void_core = supabase.createClient(
+        // --- NUCLEO_V6 (FIXED VARIABLE) ---
+        const abyssCore = supabase.createClient(
             "https://kwapzpyijgeiobcvqtoj.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
         );
 
-        let archiveData = [];
-        let isOperator = false;
-        let selectedFragment = null;
+        let dataArchive = [];
+        let selectedItem = null;
+        let isAuth = false;
 
-        // --- PARTÍCULAS NEON ---
-        const canvas = document.getElementById('abyss-particles');
+        // --- PARTÍCULAS ---
+        const canvas = document.getElementById('canvas-abyss');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -359,9 +338,9 @@
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.2;
-                this.speedX = Math.random() * 0.3 - 0.15;
-                this.speedY = Math.random() * 0.3 - 0.15;
+                this.size = Math.random() * 1.5;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
             }
             update() {
                 this.x += this.speedX;
@@ -378,7 +357,7 @@
                 ctx.fill();
             }
         }
-        for (let i = 0; i < 120; i++) pArray.push(new Particle());
+        for (let i = 0; i < 150; i++) pArray.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -390,96 +369,7 @@
         }
         animate();
 
-        // --- LOADER FAILSAFE ---
-        document.addEventListener('DOMContentLoaded', async() => {
-            gsap.to("#l-progress", {
-                width: "100%",
-                duration: 2.5
-            });
-            try {
-                const {
-                    data: {
-                        session
-                    }
-                } = await $void_core.auth.getSession();
-                if (session) {
-                    isOperator = true;
-                    document.getElementById('sys-status').style.color = "var(--neon-purple)";
-                }
-                await refreshArchive();
-            } finally {
-                gsap.to("#loader", {
-                    opacity: 0,
-                    duration: 0.8,
-                    delay: 0.5,
-                    onComplete: () => document.getElementById('loader').style.display = 'none'
-                });
-            }
-        });
-
-        async function refreshArchive() {
-            const {
-                data
-            } = await $void_core.from('poems').select('*').order('created_at', {
-                ascending: false
-            });
-            if (data) {
-                archiveData = data;
-                renderIndex();
-            }
-        }
-
-        function renderIndex() {
-            document.getElementById('archive-index').innerHTML = archiveData.map((p, i) => `
-                <div class="index-item" onclick="viewFragment('${p.id}', this)" style="border-left: 3px solid ${p.mood_color}">
-                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[${i}]</span>
-                </div>
-            `).join('');
-        }
-
-        function viewFragment(id, el) {
-            document.querySelectorAll('.index-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            selectedFragment = archiveData.find(f => f.id === id);
-
-            document.getElementById('empty-state').style.display = 'none';
-            const viewer = document.getElementById('viewer-content');
-            viewer.style.opacity = 0;
-
-            document.getElementById('viewer-title').innerText = selectedFragment.title;
-            document.getElementById('viewer-title').style.color = selectedFragment.mood_color;
-
-            const body = document.getElementById('viewer-body');
-            body.innerHTML = "";
-            let charIndex = 0;
-            const text = selectedFragment.content;
-
-            function typewriter() {
-                if (charIndex < text.length) {
-                    body.innerHTML += text.charAt(charIndex);
-                    charIndex++;
-                    setTimeout(typewriter, 12);
-                }
-            }
-            typewriter();
-            gsap.to(viewer, {
-                opacity: 1,
-                duration: 0.4
-            });
-
-            if (isOperator) {
-                const d = document.getElementById('del-btn');
-                d.classList.remove('hidden');
-                d.onclick = async() => {
-                    if (confirm("REMOVER?")) {
-                        await $void_core.from('poems').delete().eq('id', id);
-                        location.reload();
-                    }
-                };
-            }
-        }
-
-        // --- ADMIN & AUTH ---
+        // --- CORE ---
         window.addEventListener('mousemove', (e) => {
             gsap.to("#cursor", {
                 x: e.clientX,
@@ -488,30 +378,114 @@
             });
         });
 
+        document.addEventListener('DOMContentLoaded', async() => {
+            try {
+                const {
+                    data: {
+                        session
+                    }
+                } = await abyssCore.auth.getSession();
+                if (session) {
+                    isAuth = true;
+                    document.getElementById('status-tag').style.color = "var(--neon)";
+                }
+                await load();
+            } finally {
+                gsap.to("#loader", {
+                    opacity: 0,
+                    duration: 1,
+                    onComplete: () => document.getElementById('loader').style.display = 'none'
+                });
+            }
+        });
+
+        async function load() {
+            const {
+                data
+            } = await abyssCore.from('poems').select('*').order('created_at', {
+                ascending: false
+            });
+            if (data) {
+                dataArchive = data;
+                render();
+            }
+        }
+
+        function render() {
+            document.getElementById('archive-list').innerHTML = dataArchive.map((p, i) => `
+                <div class="list-item" onclick="show('${p.id}', this)" style="border-left: 3px solid ${p.mood_color}">
+                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[${i}]</span>
+                </div>
+            `).join('');
+        }
+
+        function show(id, el) {
+            document.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            selectedItem = dataArchive.find(f => f.id === id);
+
+            document.getElementById('empty-msg').style.display = 'none';
+            const v = document.getElementById('v-content');
+            v.style.opacity = 0;
+
+            document.getElementById('v-title').innerText = selectedItem.title;
+            document.getElementById('v-title').style.color = selectedItem.mood_color;
+
+            const body = document.getElementById('v-body');
+            body.innerHTML = "";
+            let idx = 0;
+            const txt = selectedItem.content;
+
+            function type() {
+                if (idx < txt.length) {
+                    body.innerHTML += txt.charAt(idx);
+                    idx++;
+                    setTimeout(type, 10);
+                }
+            }
+            type();
+
+            gsap.to(v, {
+                opacity: 1,
+                duration: 0.5
+            });
+            if (isAuth) {
+                const d = document.getElementById('del-btn');
+                d.classList.remove('hidden');
+                d.onclick = async() => {
+                    if (confirm("EXPURGAR?")) {
+                        await abyssCore.from('poems').delete().eq('id', id);
+                        location.reload();
+                    }
+                };
+            }
+        }
+
+        // --- AUTH & ACTIONS ---
         function showAuth() {
             document.getElementById('auth-modal').style.display = 'flex';
         }
 
         function closeModals() {
-            document.querySelectorAll('.terminal-overlay').forEach(m => m.style.display = 'none');
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         }
-        async function verifyAdmin() {
+        async function login() {
             const u = document.getElementById('u-id').value;
             const k = document.getElementById('u-key').value;
             if (u === "Harley" && k === "317100") {
-                await $void_core.auth.signInWithPassword({
+                await abyssCore.auth.signInWithPassword({
                     email: "harley@void.com",
                     password: k
                 });
                 location.reload();
             }
         }
-        async function injectData() {
+        async function save() {
             const t = document.getElementById('p-title').value;
             const c = document.getElementById('p-content').value;
             const y = document.getElementById('p-yt').value;
             const cl = document.getElementById('p-color').value;
-            await $void_core.from('poems').insert([{
+            await abyssCore.from('poems').insert([{
                 title: t,
                 content: c,
                 yt_id: y,
@@ -532,11 +506,11 @@
         let isPlaying = false;
 
         function handleAudio() {
-            if (!selectedFragment || !player) return;
+            if (!selectedItem || !player) return;
             if (isPlaying) {
                 player.pauseVideo();
             } else {
-                player.loadVideoById(selectedFragment.yt_id);
+                player.loadVideoById(selectedItem.yt_id);
                 player.playVideo();
             }
             isPlaying = !isPlaying;
