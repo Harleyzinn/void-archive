@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THE VOID ARCHIVE // HARLEY_V3.2</title>
+    <title>THE VOID ARCHIVE // HARLEY_V3.3</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -14,7 +14,7 @@
          :root {
             --accent: #ff3c3c;
             --bg: #020204;
-            --glass: rgba(20, 20, 30, 0.7);
+            --glass: rgba(15, 15, 20, 0.8);
             --border: rgba(255, 60, 60, 0.2);
             --neon: 0 0 15px var(--accent);
         }
@@ -24,8 +24,6 @@
             padding: 0;
             box-sizing: border-box;
             cursor: none;
-            scrollbar-width: thin;
-            scrollbar-color: var(--accent) #000;
         }
         
         body {
@@ -37,14 +35,14 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- FILTROS DE ABERRAÇÃO E SCANLINES --- */
+        /* --- FX CAMADAS --- */
         
         .scanlines {
             position: fixed;
             inset: 0;
             z-index: 9998;
             pointer-events: none;
-            background: repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 0, 0, 0.15) 3px);
+            background: repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 0, 0, 0.1) 3px);
             opacity: 0.4;
         }
         
@@ -54,43 +52,6 @@
             z-index: 9997;
             pointer-events: none;
             background: radial-gradient(circle, transparent 40%, #000 160%);
-        }
-        /* --- LOADER COM FAILSAFE --- */
-        
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 100000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            user-select: none;
-        }
-        
-        .loader-text {
-            color: var(--accent);
-            font-size: 0.7rem;
-            letter-spacing: 8px;
-            animation: glitchText 2s infinite;
-        }
-        
-        @keyframes glitchText {
-            0%,
-            100% {
-                text-shadow: 0 0 5px var(--accent);
-                transform: translate(0);
-            }
-            10% {
-                text-shadow: 2px 0 #0ff;
-                transform: translate(-2px, 0);
-            }
-            20% {
-                text-shadow: -2px 0 #f0f;
-                transform: translate(2px, 0);
-            }
         }
         
         #cursor {
@@ -104,7 +65,19 @@
             box-shadow: var(--neon);
             mix-blend-mode: difference;
         }
-        /* --- LAYOUT HARLEY V3 --- */
+        /* --- LOADER PRIORITÁRIO --- */
+        
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        /* --- LAYOUT SPLIT --- */
         
         header {
             height: 70px;
@@ -112,16 +85,15 @@
             align-items: center;
             padding: 0 30px;
             border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
             justify-content: space-between;
             flex-shrink: 0;
-            z-index: 10;
         }
         
         .brand {
             font-family: 'Cinzel';
             font-size: 1.3rem;
-            letter-spacing: 6px;
+            letter-spacing: 5px;
             color: var(--accent);
             text-shadow: var(--neon);
         }
@@ -134,12 +106,12 @@
             gap: 15px;
             padding: 15px;
         }
-        /* PAINEL ESQUERDO: ÍNDICE COM ABERRAÇÃO CROMÁTICA */
+        /* ÍNDICE COM ABERRAÇÃO */
         
         #archive-index {
             background: var(--glass);
             border: 1px solid var(--border);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
             overflow-y: auto;
         }
         
@@ -147,19 +119,15 @@
             padding: 15px 20px;
             border-bottom: 1px solid rgba(255, 60, 60, 0.05);
             font-size: 0.85rem;
-            color: #666;
+            color: #555;
             transition: 0.3s;
             cursor: pointer;
-            position: relative;
         }
-        /* Efeito de Aberração Cromática no Hover */
         
         .index-item:hover {
             color: #fff;
             background: rgba(255, 60, 60, 0.03);
-            padding-left: 25px;
             text-shadow: 1px 0 #0ff, -1px 0 #f0f;
-            /* Aberração simples e eficaz */
         }
         
         .index-item.active {
@@ -168,7 +136,7 @@
             font-weight: bold;
             text-shadow: none;
         }
-        /* PAINEL DIREITO: VISUALIZADOR */
+        /* VISUALIZADOR */
         
         #archive-viewer {
             background: var(--glass);
@@ -179,60 +147,27 @@
             position: relative;
         }
         
-        #viewer-content {
-            opacity: 0;
-        }
-        
         #viewer-title {
             font-family: 'Cinzel';
             font-size: 2.2rem;
             color: var(--accent);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
             margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
         }
         
         #viewer-body {
             font-size: 0.95rem;
             line-height: 1.8;
             white-space: pre-wrap;
-            color: #ddd;
-            margin-bottom: 50px;
+            color: #bbb;
+            margin-bottom: 40px;
         }
-        /* BOTÕES */
-        
-        .control-btn {
-            background: none;
-            border: 1px solid var(--border);
-            color: #555;
-            padding: 12px 20px;
-            font-family: inherit;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        
-        .control-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            box-shadow: var(--neon);
-        }
-        /* MOBILE FIX */
         
         @media (max-width: 768px) {
             #main-interface {
                 grid-template-columns: 1fr;
-                grid-template-rows: 30% 1fr;
-            }
-            .brand {
-                font-size: 1rem;
-                letter-spacing: 2px;
-            }
-            #archive-viewer {
-                padding: 25px;
-            }
-            #viewer-title {
-                font-size: 1.4rem;
+                grid-template-rows: 35% 1fr;
             }
         }
         /* ADMIN HIDDEN */
@@ -242,7 +177,7 @@
             bottom: 10px;
             right: 10px;
             font-size: 0.5rem;
-            color: #151515;
+            color: #111;
             z-index: 10001;
             cursor: pointer;
         }
@@ -300,69 +235,62 @@
     <div id="cursor"></div>
 
     <div id="loader">
-        <div class="loader-text">[ RECONECTANDO_FRAGMENTOS_V3.2 ]</div>
-        <div style="width: 150px; height: 1px; background: #111; margin-top: 20px; position:relative; overflow:hidden;">
-            <div id="l-bar" style="width: 0%; height: 100%; background: var(--accent); box-shadow: var(--neon);"></div>
-        </div>
+        <div style="color:var(--accent); font-size:0.7rem; letter-spacing:10px;">[ ESTABILIZANDO_NUCLEO_V3.3 ]</div>
     </div>
 
     <header>
-        <div class="brand">VOID_ARCHIVE // NUCLEUS</div>
-        <div id="sys-status" style="font-size: 0.6rem; color: #333;">// LINK: ESTÁVEL</div>
+        <div class="brand">VOID_ARCHIVE // HARLEY</div>
+        <div id="sys-status" style="font-size: 0.6rem; color: #333;">// LINK: SECURE</div>
     </header>
 
     <section id="main-interface">
         <aside id="archive-index"></aside>
         <main id="archive-viewer">
             <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#222; font-size:0.8rem;">// AGUARDANDO_DADOS //</div>
-            <div id="viewer-content">
+            <div id="viewer-content" style="opacity:0;">
                 <div id="viewer-title"></div>
                 <div id="viewer-body"></div>
-                <div id="viewer-controls" style="display:flex; gap:15px;">
-                    <button class="control-btn" id="play-btn" onclick="toggleAudio()">[ ▶ AUDIO_START ]</button>
-                    <button class="control-btn hidden" id="del-btn" style="border-color:#500; color:#500;">[ X DELETE ]</button>
+                <div style="display:flex; gap:15px;">
+                    <button class="control-btn" onclick="toggleAudio()" style="background:none; border:1px solid var(--border); color:#555; padding:10px; font-size:0.6rem; cursor:pointer;">[ ▶ AUDIO ]</button>
+                    <button id="del-btn" class="hidden" style="background:none; border:1px solid #500; color:#500; padding:10px; font-size:0.6rem; cursor:pointer;">[ X DELETE ]</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="secret-door" onclick="showLogin()">ERR_SYS_LOG_77</div>
+    <div id="secret-door" onclick="showLogin()">ERR_LINK_77</div>
 
     <div id="login-modal" class="terminal-overlay">
         <div class="terminal">
-            <p style="color:var(--accent); margin-bottom:20px; font-size:0.7rem;">>> LOGIN_OPERADOR_HARLEY</p>
-            <input type="text" id="u-name" placeholder="IDENTIDADE">
-            <input type="password" id="u-pass" placeholder="CHAVE">
-            <button class="btn" onclick="authHarley()">INICIALIZAR</button>
-            <button onclick="closeModals()" style="background:none; border:none; color:#444; margin-top:10px; cursor:pointer; width:100%; font-size:0.6rem;">[ CANCELAR ]</button>
+            <input type="text" id="u-name" placeholder="ID">
+            <input type="password" id="u-pass" placeholder="PASS">
+            <button class="btn" onclick="authHarley()">ACCESS</button>
         </div>
     </div>
 
     <div id="admin-modal" class="terminal-overlay">
         <div class="terminal">
-            <p style="color:var(--accent); margin-bottom:20px; font-size:0.7rem;">>> INJEÇÃO_DE_DADOS</p>
             <input type="text" id="p-title" placeholder="TÍTULO">
-            <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
+            <input type="text" id="p-yt" placeholder="YT_ID">
             <textarea id="p-content" rows="10" placeholder="VERSOS..."></textarea>
-            <input type="color" id="p-color" value="#ff3c3c" style="height:40px;">
-            <button class="btn" onclick="savePoem()">EXECUTAR_INJEÇÃO</button>
-            <button onclick="closeModals()" style="background:none; border:none; color:#444; margin-top:10px; cursor:pointer; width:100%; font-size:0.6rem;">[ DESCONECTAR ]</button>
+            <input type="color" id="p-color" value="#ff3c3c">
+            <button class="btn" onclick="savePoem()">INJECT</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- CHAVES FICTÍCIAS FORNECIDAS ---
-        const SB_URL = "https://kwapzpyijgeiobcvqtoj.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA";
-        const supabase = supabase.createClient(SB_URL, SB_KEY);
+        // RENOMEADO PARA EVITAR CONFLITO (CORREÇÃO DA IMAGEM 3)
+        const supabaseClient = supabase.createClient(
+            "https://kwapzpyijgeiobcvqtoj.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
+        );
 
         let poemsData = [];
         let currentPoem = null;
         let isAdmin = false;
 
-        // --- SISTEMA DE CARREGAMENTO COM PROTEÇÃO ANTI-TRAVAMENTO ---
         function hideLoader() {
             gsap.to("#loader", {
                 opacity: 0,
@@ -373,44 +301,29 @@
             });
         }
 
-        // FAILSAFE: Se em 6 segundos o loader não sumir, força o desaparecimento.
-        setTimeout(() => {
-            if (document.getElementById('loader').style.display !== 'none') {
-                console.warn("// FAILSAFE: ACESSO FORÇADO AO NÚCLEO");
-                hideLoader();
-            }
-        }, 6000);
-
         document.addEventListener('DOMContentLoaded', async() => {
-            gsap.to("#l-bar", {
-                width: "100%",
-                duration: 2
-            });
-
             try {
                 const {
                     data: {
                         session
                     }
-                } = await supabase.auth.getSession();
+                } = await supabaseClient.auth.getSession();
                 if (session) {
                     isAdmin = true;
-                    document.getElementById('sys-status').innerText = "// HARLEY_CONECTADO";
                     document.getElementById('sys-status').style.color = "var(--accent)";
                 }
                 await loadArchive();
             } catch (err) {
-                console.error("// ERRO_SISTEMA:", err);
+                console.error("Critical Failure:", err);
             } finally {
-                hideLoader(); // Garante que o loader suma independente de erro
+                hideLoader(); // SEMPRE ESCONDE O LOADER (CORREÇÃO DA IMAGEM 5)
             }
         });
 
         async function loadArchive() {
             const {
-                data,
-                error
-            } = await supabase.from('poems').select('*').order('created_at', {
+                data
+            } = await supabaseClient.from('poems').select('*').order('created_at', {
                 ascending: false
             });
             if (data) {
@@ -422,7 +335,7 @@
         function renderIndex(data) {
             document.getElementById('archive-index').innerHTML = data.map((p, i) => `
                 <div class="index-item" onclick="loadToViewer('${p.id}', this)" style="border-left: 2px solid ${p.mood_color}">
-                    <span>${p.title}</span> <span style="opacity:0.3; font-size:0.6rem;">[#${i}]</span>
+                    <span>${p.title}</span> <span style="opacity:0.2; font-size:0.6rem;">[#${i}]</span>
                 </div>
             `).join('');
         }
@@ -432,43 +345,47 @@
             el.classList.add('active');
             currentPoem = poemsData.find(p => p.id === id);
 
-            gsap.to("#viewer-content", {
-                opacity: 0,
-                duration: 0.2,
-                onComplete: () => {
-                    document.getElementById('empty-state').style.display = 'none';
-                    document.getElementById('viewer-title').innerText = currentPoem.title;
-                    document.getElementById('viewer-title').style.color = currentPoem.mood_color;
-                    document.getElementById('viewer-body').innerText = currentPoem.content;
+            document.getElementById('empty-state').style.display = 'none';
+            const content = document.getElementById('viewer-content');
+            content.style.opacity = 1;
+            document.getElementById('viewer-title').innerText = currentPoem.title;
+            document.getElementById('viewer-title').style.color = currentPoem.mood_color;
 
-                    if (isAdmin) {
-                        const d = document.getElementById('del-btn');
-                        d.classList.remove('hidden');
-                        d.onclick = () => killPoem(currentPoem.id);
-                    }
+            // EFEITO TYPEWRITER
+            const body = document.getElementById('viewer-body');
+            body.innerHTML = "";
+            let i = 0;
+            const text = currentPoem.content;
 
-                    gsap.to("#viewer-content", {
-                        opacity: 1,
-                        duration: 0.5
-                    });
+            function type() {
+                if (i < text.length) {
+                    body.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 15);
                 }
-            });
+            }
+            type();
+
+            if (isAdmin) {
+                const d = document.getElementById('del-btn');
+                d.classList.remove('hidden');
+                d.onclick = async() => {
+                    if (confirm("DELETE?")) {
+                        await supabaseClient.from('poems').delete().eq('id', currentPoem.id);
+                        location.reload();
+                    }
+                };
+            }
         }
 
-        // --- OPERAÇÕES ---
         function showLogin() {
             document.getElementById('login-modal').style.display = 'flex';
         }
-
-        function closeModals() {
-            document.querySelectorAll('.terminal-overlay').forEach(m => m.style.display = 'none');
-        }
-
         async function authHarley() {
             const u = document.getElementById('u-name').value;
             const p = document.getElementById('u-pass').value;
             if (u === "Harley" && p === "317100") {
-                await supabase.auth.signInWithPassword({
+                await supabaseClient.auth.signInWithPassword({
                     email: "harley@void.com",
                     password: p
                 });
@@ -481,20 +398,13 @@
             const c = document.getElementById('p-content').value;
             const y = document.getElementById('p-yt').value;
             const cl = document.getElementById('p-color').value;
-            await supabase.from('poems').insert([{
+            await supabaseClient.from('poems').insert([{
                 title: t,
                 content: c,
                 yt_id: y,
                 mood_color: cl
             }]);
             location.reload();
-        }
-
-        async function killPoem(id) {
-            if (confirm("CONFIRMAR_DELEÇÃO?")) {
-                await supabase.from('poems').delete().eq('id', id);
-                location.reload();
-            }
         }
 
         window.addEventListener('mousemove', (e) => {
@@ -519,11 +429,9 @@
             if (!currentPoem || !player) return;
             if (isPlaying) {
                 player.pauseVideo();
-                document.getElementById('play-btn').innerText = "[ ▶ AUDIO_RESUME ]";
             } else {
                 player.loadVideoById(currentPoem.yt_id);
                 player.playVideo();
-                document.getElementById('play-btn').innerText = "[ ■ AUDIO_STOP ]";
             }
             isPlaying = !isPlaying;
         }
