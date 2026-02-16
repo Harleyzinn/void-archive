@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VOID ARCHIVE // VISUAL_MASTER</title>
+    <title>THE VOID ARCHIVE // HARLEY_LINK</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -14,11 +14,9 @@
     <style>
          :root {
             --accent: #ff3c3c;
-            /* Fundo mais profundo com leve gradiente */
             --bg: radial-gradient(circle at 50% 50%, #0a0a0f 0%, #000000 100%);
             --surface: rgba(15, 15, 20, 0.6);
-            /* Definindo o brilho neon */
-            --neon-glow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 40px var(--accent);
+            --neon-glow: 0 0 10px var(--accent), 0 0 20px var(--accent);
         }
         
         * {
@@ -35,17 +33,15 @@
             overflow: hidden;
             height: 100vh;
         }
-        /* --- CANVAS DE PARTÍCULAS --- */
+        /* --- Estética de Elite --- */
         
         #particle-canvas {
             position: fixed;
             inset: 0;
             z-index: 1;
             pointer-events: none;
-            mix-blend-mode: screen;
             opacity: 0.6;
         }
-        /* --- Efeitos Visuais (Camadas Superiores) --- */
         
         .vignette {
             position: fixed;
@@ -75,7 +71,6 @@
                 opacity: 0.25;
             }
         }
-        /* --- Cursor --- */
         
         #cursor {
             position: fixed;
@@ -86,10 +81,8 @@
             z-index: 10000;
             pointer-events: none;
             box-shadow: var(--neon-glow);
-            /* Cursor brilhante */
-            transition: transform 0.1s ease-out;
         }
-        /* --- Layout e Tipografia --- */
+        /* --- UI --- */
         
         header {
             height: 30vh;
@@ -103,89 +96,53 @@
         
         .glitch-title {
             font-family: 'Cinzel', serif;
-            font-size: 4.5rem;
-            letter-spacing: 25px;
+            font-size: 4rem;
+            letter-spacing: 20px;
             color: var(--accent);
             text-shadow: var(--neon-glow);
-            /* Título brilhante */
-            animation: textGlitch 4s infinite alternate;
-        }
-        
-        @keyframes textGlitch {
-            0% {
-                text-shadow: var(--neon-glow);
-                transform: skewX(0deg);
-            }
-            95% {
-                text-shadow: var(--neon-glow);
-                transform: skewX(0deg);
-            }
-            96% {
-                text-shadow: -2px 0 #0ff, 2px 0 #f0f;
-                transform: skewX(5deg);
-            }
-            98% {
-                text-shadow: -2px 0 #f0f, 2px 0 #0ff;
-                transform: skewX(-5deg);
-            }
-            100% {
-                text-shadow: var(--neon-glow);
-                transform: skewX(0deg);
-            }
         }
         
         #poetry-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 50px;
-            padding: 50px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            padding: 40px;
             max-width: 1400px;
             margin: 0 auto;
             overflow-y: auto;
             height: 65vh;
-            perspective: 1200px;
             z-index: 10;
             position: relative;
         }
-        /* --- CARDS APRIMORADOS --- */
         
         .poem-card {
             background: var(--surface);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 40px;
+            padding: 35px;
             backdrop-filter: blur(20px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s;
             clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
-            transform-style: preserve-3d;
         }
         
         .poem-card:hover {
             border-color: var(--accent);
-            transform: scale(1.05) rotateX(8deg) rotateY(-2deg) translateZ(20px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 60, 60, 0.1);
+            transform: scale(1.02) translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
         }
-        
-        .poem-card h3 {
-            text-shadow: 0 0 10px currentColor;
-        }
-        /* Títulos dos poemas brilham */
-        /* --- Terminal Secreto e Interfaces --- */
+        /* --- Terminal Oculto --- */
         
         #secret-trigger {
             position: fixed;
-            bottom: 15px;
-            right: 15px;
-            font-size: 0.6rem;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.2);
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.5rem;
+            color: #111;
             z-index: 10000;
             cursor: pointer;
-            transition: 0.3s;
         }
         
         #secret-trigger:hover {
             color: var(--accent);
-            text-shadow: 0 0 10px var(--accent);
         }
         
         #admin-panel,
@@ -194,63 +151,31 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.95);
             z-index: 9000;
-            backdrop-filter: blur(30px);
             display: none;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(20px);
         }
         
         .terminal {
             width: 90%;
-            max-width: 500px;
+            max-width: 450px;
             border: 1px solid var(--accent);
             padding: 40px;
-            background: #050505;
+            background: #000;
             box-shadow: var(--neon-glow);
-            position: relative;
-            overflow: hidden;
-        }
-        /* Linha de scan no terminal */
-        
-        .terminal::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: var(--accent);
-            opacity: 0.5;
-            box-shadow: 0 0 15px var(--accent);
-            animation: scanline 3s linear infinite;
-        }
-        
-        @keyframes scanline {
-            0% {
-                top: -10%;
-            }
-            100% {
-                top: 110%;
-            }
         }
         
         input,
         textarea {
             width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #222;
+            background: #080808;
+            border: 1px solid #1a1a1a;
             padding: 15px;
             color: var(--accent);
             font-family: inherit;
             margin-bottom: 20px;
             outline: none;
-            transition: 0.3s;
-        }
-        
-        input:focus,
-        textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(255, 60, 60, 0.2);
         }
         
         .inject-btn {
@@ -261,7 +186,7 @@
             color: var(--accent);
             font-weight: bold;
             cursor: pointer;
-            letter-spacing: 5px;
+            letter-spacing: 3px;
             transition: 0.3s;
         }
         
@@ -270,7 +195,6 @@
             color: #000;
             box-shadow: var(--neon-glow);
         }
-        /* --- Loader --- */
         
         #loader {
             position: fixed;
@@ -283,125 +207,102 @@
             justify-content: center;
             pointer-events: none;
         }
-        
-        .hidden {
-            display: none !important;
-        }
     </style>
 </head>
 
 <body class="crt-overlay">
 
     <canvas id="particle-canvas"></canvas>
-
     <div class="vignette"></div>
     <div id="cursor"></div>
 
     <div id="loader">
-        <div id="l-text" style="color:var(--accent); font-size:0.7rem; letter-spacing:8px; text-shadow: 0 0 10px var(--accent);">[ MATERIALIZANDO_VÁCUO ]</div>
-        <div style="width: 200px; height: 2px; background: #111; margin-top: 25px; overflow:hidden; position:relative;">
-            <div id="l-bar" style="width: 0%; height: 100%; background: var(--accent); box-shadow: 0 0 15px var(--accent);"></div>
+        <div id="l-text" style="color:var(--accent); font-size:0.7rem; letter-spacing:8px;">[ SINCRONIZANDO_ABISMO ]</div>
+        <div style="width: 150px; height: 1px; background: #111; margin-top: 20px;">
+            <div id="l-bar" style="width: 0%; height: 100%; background: var(--accent); box-shadow: var(--neon-glow);"></div>
         </div>
     </div>
 
     <header>
         <h1 class="glitch-title">VOID_ARCHIVE</h1>
     </header>
-
     <main id="poetry-grid"></main>
-
-    <div id="secret-trigger" onclick="openAuth()">// ERR_SYS_NUCLEUS_404</div>
+    <div id="secret-trigger" onclick="openAuth()">ERR_SYS_77</div>
 
     <div id="auth-overlay">
-        <div class="terminal" style="max-width: 350px; text-align:center;">
-            <p style="font-size:0.7rem; color:var(--accent); margin-bottom:30px; letter-spacing: 2px;">>> IDENTIFICAÇÃO_BIOMÉTRICA</p>
-            <input type="email" id="email" placeholder="ID_DIGITAL" style="text-align:center;">
-            <input type="password" id="pass" placeholder="CHAVE_MESTRA" style="text-align:center;">
-            <button class="inject-btn" onclick="signIn()">AUTENTICAR</button>
+        <div class="terminal">
+            <p style="font-size:0.6rem; color:var(--accent); margin-bottom:20px;">>> IDENTIFICAÇÃO_OPERADOR</p>
+            <input type="text" id="user-name" placeholder="NOME_DO_USER">
+            <input type="password" id="user-pass" placeholder="SENHA">
+            <button class="inject-btn" onclick="signIn()">DESBLOQUEAR_SISTEMA</button>
         </div>
     </div>
 
     <div id="admin-panel">
-        <div class="terminal">
-            <p style="font-size:0.7rem; color:var(--accent); margin-bottom:20px;">>> ESTAÇÃO_DE_ESCRITA_ATIVA</p>
+        <div class="terminal" style="max-width: 600px;">
+            <p style="font-size:0.6rem; color:var(--accent); margin-bottom:20px;">>> ESTAÇÃO_DE_ESCRITA_HARLEY</p>
             <input type="text" id="p-title" placeholder="TÍTULO">
-            <input type="text" id="p-yt" placeholder="YOUTUBE_ID (Ex: dQw4w9WgXcQ)">
+            <input type="text" id="p-yt" placeholder="ID_YOUTUBE">
             <textarea id="p-content" rows="8" placeholder="VERSOS..."></textarea>
-            <input type="color" id="p-color" value="#ff3c3c" style="height:40px; cursor:pointer;">
-            <button class="inject-btn" onclick="injectPoem()">INJETAR DADOS</button>
-            <button onclick="closeAdmin()" style="margin-top:20px; background:none; border:none; color:#333; font-size:0.6rem; width:100%; cursor:pointer;">[ DESCONECTAR ]</button>
+            <input type="color" id="p-color" value="#ff3c3c">
+            <button class="inject-btn" onclick="injectPoem()">INJETAR NO ABISMO</button>
+            <button onclick="closeAdmin()" style="margin-top:20px; background:none; border:none; color:#222; font-size:0.5rem; width:100%; cursor:pointer;">[ FECHAR ]</button>
         </div>
     </div>
 
-    <div id="yt-player" class="hidden"></div>
+    <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- CONFIGURAÇÃO (Update Your Keys Here) ---
+        // --- COLOQUE SUAS CHAVES AQUI ---
         const SB_URL = "https://kwapzpyijgeiobcvqtoj.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdAyy";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         const sfx = {
             startup: new Audio('https://www.soundjay.com/sci-fi/sounds/sci-fi-interface-1.mp3')
         };
 
-        // --- SISTEMA DE PARTÍCULAS (CANVAS) ---
+        // --- PARTÍCULAS ---
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-
-        let particlesArray = [];
-        const numberOfParticles = 150; // Quantidade de poeira (Ryzen 5 aguenta tranquilo)
-
+        let particles = [];
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 - 0.25;
-                this.color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.size > 0.2) this.size -= 0.01;
-                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height || this.size <= 0.2) {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 2 + 0.5;
-                }
+                this.size = Math.random() * 1.5;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
             }
             draw() {
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
+                ctx.fillStyle = "#ff3c3c";
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
             }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                }
+            }
         }
-
-        function initParticles() {
-            for (let i = 0; i < numberOfParticles; i++) particlesArray.push(new Particle());
-        }
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
 
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-            }
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
             requestAnimationFrame(animateParticles);
         }
-        initParticles();
         animateParticles();
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
 
-        // --- CURSOR & LOADER ---
+        // --- CORE ---
         window.addEventListener('mousemove', (e) => {
             gsap.to("#cursor", {
                 x: e.clientX,
@@ -412,8 +313,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             gsap.to("#l-bar", {
                 width: "100%",
-                duration: 3,
-                ease: "power4.inOut",
+                duration: 2.5,
                 onComplete: fetchArchive
             });
         });
@@ -425,31 +325,26 @@
                 ascending: false
             });
             if (data) {
-                const grid = document.getElementById('poetry-grid');
-                grid.innerHTML = data.map(p => `
-                    <article class="poem-card" style="border-top: 3px solid ${p.mood_color}" onclick="playPoem('${p.yt_id}')">
-                        <h3 style="color:${p.mood_color}; text-shadow: 0 0 15px ${p.mood_color}; margin-bottom:25px; font-size:1.4rem;">${p.title}</h3>
-                        <p style="font-size:0.85rem; opacity:0.7; line-height:1.8;">${p.content}</p>
+                document.getElementById('poetry-grid').innerHTML = data.map(p => `
+                    <article class="poem-card" style="border-top: 2px solid ${p.mood_color}" onclick="playPoem('${p.yt_id}')">
+                        <h3 style="color:${p.mood_color}; margin-bottom:15px;">${p.title}</h3>
+                        <p style="font-size:0.8rem; opacity:0.6; line-height:1.7;">${p.content}</p>
                     </article>
                 `).join('');
                 gsap.from(".poem-card", {
                     opacity: 0,
-                    y: 60,
-                    rotateX: -10,
-                    stagger: 0.15,
-                    duration: 1.2,
-                    ease: "expo.out"
+                    y: 30,
+                    stagger: 0.1
                 });
             }
             gsap.to("#loader", {
                 opacity: 0,
-                duration: 1.5,
-                delay: 0.5,
+                duration: 1,
                 onComplete: () => document.getElementById('loader').style.display = 'none'
             });
         }
 
-        // --- ADMIN ---
+        // --- LOGIN: HARLEY PROTOCOL ---
         function openAuth() {
             document.getElementById('auth-overlay').style.display = 'flex';
         }
@@ -457,23 +352,32 @@
         function closeAdmin() {
             document.getElementById('admin-panel').style.display = 'none';
         }
+
         async function signIn() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            const {
-                error
-            } = await supabaseClient.auth.signInWithPassword({
-                email,
-                password: pass
-            });
-            if (!error) {
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'flex';
-                sfx.startup.play();
+            const user = document.getElementById('user-name').value;
+            const pass = document.getElementById('user-pass').value;
+
+            // Mapeia o nome "Harley" para o e-mail real do Supabase
+            if (user === "Harley" && pass === "317100") {
+                const {
+                    error
+                } = await supabaseClient.auth.signInWithPassword({
+                    email: "harley@void.com", // O e-mail que você criou no painel
+                    password: pass
+                });
+
+                if (!error) {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    document.getElementById('admin-panel').style.display = 'flex';
+                    sfx.startup.play();
+                } else {
+                    alert("FALHA_NA_SINCRO: " + error.message);
+                }
             } else {
-                alert("ACESSO_NEGADO");
+                alert("ACESSO_NEGADO: IDENTIDADE_NÃO_RECONHECIDA");
             }
         }
+
         async function injectPoem() {
             const title = document.getElementById('p-title').value;
             const yt_id = document.getElementById('p-yt').value;
@@ -490,7 +394,6 @@
             if (!error) location.reload();
         }
 
-        // --- YOUTUBE ---
         let player;
 
         function onYouTubeIframeAPIReady() {
