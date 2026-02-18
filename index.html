@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID_ARCHIVE // V11_STABLE_GLITCH</title>
+    <title>VOID_ARCHIVE // V11.2_OVERDRIVE</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -15,7 +15,7 @@
             --cyan: #00f7ff;
             --magenta: #ff00ea;
             --bg: #000;
-            --glow: 0 0 10px var(--magenta), 0 0 20px var(--cyan);
+            --glow: 0 0 15px var(--magenta), 0 0 25px var(--cyan);
         }
         
         * {
@@ -26,7 +26,7 @@
         }
         
         body {
-            background-color: var(--bg);
+            background-color: var(--bg) !important;
             color: #fff;
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
@@ -34,7 +34,7 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- EFEITOS VISUAIS --- */
+        /* --- FX CAMADAS --- */
         
         #abyss-canvas {
             position: fixed;
@@ -44,7 +44,7 @@
             opacity: 0.8;
         }
         
-        .noise-fx {
+        .static-noise {
             position: fixed;
             inset: 0;
             z-index: 9996;
@@ -63,6 +63,14 @@
             opacity: 0.3;
         }
         
+        .vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 9997;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 30%, #000 150%);
+        }
+        
         #cursor {
             position: fixed;
             width: 10px;
@@ -73,7 +81,7 @@
             box-shadow: var(--glow);
             mix-blend-mode: difference;
         }
-        /* --- HEADER --- */
+        /* --- UI ELEMENTS --- */
         
         header {
             height: 70px;
@@ -92,12 +100,11 @@
             color: #fff;
             text-shadow: -2px 0 var(--cyan), 2px 0 var(--magenta);
         }
-        /* --- LAYOUT --- */
         
         #main-interface {
             display: grid;
             grid-template-columns: 320px 1fr;
-            height: calc(100vh - 70px);
+            height: calc(100vh - 110px);
             gap: 10px;
             padding: 15px;
             position: relative;
@@ -105,7 +112,7 @@
         }
         
         #archive-list {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             border: 2px solid #222;
             overflow-y: auto;
         }
@@ -117,11 +124,12 @@
             color: #555;
             transition: 0.2s;
             cursor: pointer;
+            text-transform: uppercase;
         }
         
         .list-item:hover {
             color: #fff;
-            background: #0a0a0a;
+            background: rgba(191, 0, 255, 0.1);
             text-shadow: -2px 0 var(--cyan), 2px 0 var(--magenta);
             padding-left: 30px;
         }
@@ -143,7 +151,7 @@
         
         #v-title {
             font-family: 'Rubik Glitch';
-            font-size: 3rem;
+            font-size: 3.5rem;
             color: #fff;
             margin-bottom: 30px;
             text-shadow: 4px 4px var(--magenta);
@@ -154,12 +162,27 @@
             line-height: 1.8;
             white-space: pre-wrap;
             color: #ddd;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
         }
-        /* --- BOTÃO DE ADICIONAR (RESTAURADO E VISÍVEL) --- */
+        /* --- TERMINAL DE LOG (NOVO) --- */
+        
+        #log-bar {
+            height: 40px;
+            background: #000;
+            border-top: 1px solid #222;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 0.6rem;
+            color: #333;
+            gap: 15px;
+            z-index: 10;
+        }
+        /* --- BOTÕES --- */
         
         #admin-trigger {
             position: fixed;
-            bottom: 25px;
+            bottom: 60px;
             right: 25px;
             width: 180px;
             height: 45px;
@@ -184,7 +207,22 @@
             box-shadow: none;
             transform: translate(2px, 2px);
         }
-        /* --- MODAIS --- */
+        
+        .btn-action {
+            background: #000;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 10px 25px;
+            font-family: 'Rubik Glitch';
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .btn-action:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 5px 5px 0 var(--magenta);
+        }
         
         .modal {
             position: fixed;
@@ -194,7 +232,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
         
         .terminal-box {
@@ -218,17 +256,6 @@
             outline: none;
         }
         
-        .btn-action {
-            width: 100%;
-            padding: 15px;
-            background: #fff;
-            border: none;
-            color: #000;
-            font-family: 'Rubik Glitch';
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-        
         #loader {
             position: fixed;
             inset: 0;
@@ -238,47 +265,58 @@
             align-items: center;
             justify-content: center;
             color: var(--magenta);
-            letter-spacing: 5px;
+            font-family: 'Rubik Glitch';
+            font-size: 1.5rem;
+            letter-spacing: 10px;
+        }
+        
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 
-<body class="noise-fx">
+<body class="noise-overlay">
 
     <canvas id="abyss-canvas"></canvas>
     <div class="scanlines"></div>
+    <div class="vignette"></div>
     <div id="cursor"></div>
 
-    <div id="loader">CARREGANDO_PROTOCOLOS...</div>
+    <div id="loader">NEURAL_BOOT...</div>
 
     <header>
         <div class="brand">VOID_ARCHIVE // HARLEY</div>
-        <div style="font-size:0.6rem; color:#222;">SYSTEM_V11_ONLINE</div>
+        <div style="font-size:0.6rem; color:#111;">SYNC_V11.2_ACTIVE</div>
     </header>
 
     <section id="main-interface">
         <aside id="archive-list"></aside>
         <main id="viewer">
-            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111; font-size:1.5rem; font-family:'Rubik Glitch';">AWAITING_INPUT</div>
+            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111; font-size:1.5rem; font-family:'Rubik Glitch';">AWAITING_COMMAND</div>
             <div id="v-content" style="opacity:0;">
                 <div id="v-title"></div>
                 <div id="v-body"></div>
                 <div style="display:flex; gap:20px; margin-top:50px;">
-                    <button class="btn-action" onclick="handleAudio()" style="width:auto; padding: 10px 30px;">▶ ÁUDIO</button>
-                    <button id="del-btn" class="btn-action hidden" style="width:auto; padding: 10px 30px; background:#500; color:#fff;">X PURGE</button>
+                    <button class="btn-action" onclick="handleAudio()">▶ PLAY_SIGNAL</button>
+                    <button id="del-btn" class="btn-action hidden" style="border-color:#500; color:#500;">X PURGE</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="admin-trigger" onclick="showAuth()">ADICIONAR_DADOS</div>
+    <div id="log-bar">
+        <span style="color:var(--magenta)">[LOG]:</span>
+        <span id="log-txt">SISTEMA_INICIALIZADO...</span>
+    </div>
+
+    <div id="admin-trigger" onclick="showAuth()">ADICIONAR_FRAGMENTO</div>
 
     <div id="auth-modal" class="modal">
         <div class="terminal-box">
-            <p style="color:#fff; margin-bottom:20px; font-family:'Rubik Glitch';">// BIO_AUTH //</p>
-            <input type="text" id="u-id" placeholder="OPERADOR">
-            <input type="password" id="u-key" placeholder="SENHA">
-            <button class="btn-action" onclick="login()">ACESSAR</button>
+            <p style="color:#fff; margin-bottom:20px; font-family:'Rubik Glitch'; font-size:1.5rem;">// BIO_AUTH_REQUIRED //</p>
+            <input type="password" id="u-key" placeholder="CHAVE_MESTRA (317100)">
+            <button class="btn-action" style="width:100%" onclick="login()">AUTENTICAR</button>
         </div>
     </div>
 
@@ -286,24 +324,32 @@
         <div class="terminal-box">
             <input type="text" id="p-title" placeholder="TÍTULO">
             <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
-            <textarea id="p-content" rows="10" placeholder="DEPOSITE OS VERSOS..."></textarea>
-            <input type="color" id="p-color" value="#ff00ea" style="height:45px;">
-            <button class="btn-action" onclick="save()">INJETAR</button>
-            <button onclick="closeModals()" style="background:none; border:none; color:#444; margin-top:10px; width:100%; cursor:pointer;">[ FECHAR ]</button>
+            <textarea id="p-content" rows="10" placeholder="DEPOSITE OS DADOS..."></textarea>
+            <input type="color" id="p-color" value="#ff00ea" style="height:45px; cursor:pointer;">
+            <button class="btn-action" style="width:100%" onclick="save()">EXECUTAR_INJEÇÃO</button>
+            <button onclick="closeModals()" style="background:none; border:none; color:#444; margin-top:10px; width:100%; cursor:pointer;">[ FECHAR_TERMINAL ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        // --- CONFIGURAÇÃO SEM CONFLITO ---
-        const voidArchive = supabase.createClient(
+        // --- NUCLEO_HARLEY (ANTI-REDECLARATION) ---
+        const harleyArchive = supabase.createClient(
             "https://kwapzpyijgeiobcvqtoj.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
         );
 
         let archiveData = [];
         let isAuth = false;
+
+        // --- AUDIO Digitação ---
+        const typeSfx = new Audio('https://www.soundjay.com/communication/sounds/typewriter-key-1.mp3');
+        typeSfx.volume = 0.15;
+
+        function log(msg) {
+            document.getElementById('log-txt').innerText = msg;
+        }
 
         // --- PARTÍCULAS ---
         const canvas = document.getElementById('abyss-canvas');
@@ -316,8 +362,8 @@
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 1.5;
-                this.speedX = Math.random() * 0.4 - 0.2;
-                this.speedY = Math.random() * 0.4 - 0.2;
+                this.speedX = Math.random() * 0.3 - 0.15;
+                this.speedY = Math.random() * 0.3 - 0.15;
             }
             update() {
                 this.x += this.speedX;
@@ -334,7 +380,7 @@
                 ctx.fill();
             }
         }
-        for (let i = 0; i < 150; i++) pArray.push(new Particle());
+        for (let i = 0; i < 130; i++) pArray.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -361,15 +407,17 @@
                     data: {
                         session
                     }
-                } = await voidArchive.auth.getSession();
-                if (session) isAuth = true;
+                } = await harleyArchive.auth.getSession();
+                if (session) {
+                    isAuth = true;
+                    log("OPERADOR_IDENTIFICADO: HARLEY");
+                }
                 await loadArchive();
-            } catch (e) {
-                console.error("Erro na conexão:", e);
             } finally {
                 gsap.to("#loader", {
                     opacity: 0,
-                    duration: 0.5,
+                    duration: 0.8,
+                    delay: 0.5,
                     onComplete: () => document.getElementById('loader').style.display = 'none'
                 });
             }
@@ -378,16 +426,17 @@
         async function loadArchive() {
             const {
                 data
-            } = await voidArchive.from('poems').select('*').order('created_at', {
+            } = await harleyArchive.from('poems').select('*').order('created_at', {
                 ascending: false
             });
             if (data) {
                 archiveData = data;
-                renderList();
+                render();
+                log("DADOS_SINCRONIZADOS_COM_O_ABISMO");
             }
         }
 
-        function renderList() {
+        function render() {
             document.getElementById('archive-list').innerHTML = archiveData.map((p, i) => `
                 <div class="list-item" onclick="view('${p.id}', this)" style="border-left: 5px solid ${p.mood_color}">
                     [${i}] ${p.title}
@@ -399,13 +448,14 @@
             document.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
             const frag = archiveData.find(f => f.id === id);
+            log(`CARREGANDO_FRAGMENTO: ${frag.title}...`);
 
             document.getElementById('empty-state').style.display = 'none';
-            const viewer = document.getElementById('v-content');
+            const v = document.getElementById('v-content');
 
-            gsap.fromTo(viewer, {
+            gsap.fromTo(v, {
                 opacity: 0,
-                scale: 0.9
+                scale: 0.95
             }, {
                 opacity: 1,
                 scale: 1,
@@ -413,7 +463,6 @@
                 onStart: () => {
                     document.getElementById('v-title').innerText = frag.title;
                     document.getElementById('v-title').style.textShadow = `4px 4px ${frag.mood_color}`;
-
                     const body = document.getElementById('v-body');
                     body.innerHTML = "";
                     let charIdx = 0;
@@ -422,8 +471,13 @@
                     function typewriter() {
                         if (charIdx < text.length) {
                             body.innerHTML += text.charAt(charIdx);
+                            const s = typeSfx.cloneNode();
+                            s.volume = 0.15;
+                            s.play();
                             charIdx++;
                             setTimeout(typewriter, 10);
+                        } else {
+                            log("FRAGMENTO_CARREGADO_COM_SUCESSO");
                         }
                     }
                     typewriter();
@@ -435,14 +489,14 @@
                 d.classList.remove('hidden');
                 d.onclick = async() => {
                     if (confirm("DELETAR PERMANENTEMENTE?")) {
-                        await voidArchive.from('poems').delete().eq('id', id);
+                        await harleyArchive.from('poems').delete().eq('id', id);
                         location.reload();
                     }
                 };
             }
         }
 
-        // --- AÇÕES ADMIN ---
+        // --- ADMIN ---
         function showAuth() {
             document.getElementById('auth-modal').style.display = 'flex';
         }
@@ -450,39 +504,30 @@
         function closeModals() {
             document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         }
-
         async function login() {
-            const u = document.getElementById('u-id').value;
             const k = document.getElementById('u-key').value;
-            if (u === "Harley" && k === "317100") {
-                const {
-                    error
-                } = await voidArchive.auth.signInWithPassword({
+            if (k === "317100") {
+                await harleyArchive.auth.signInWithPassword({
                     email: "harley@void.com",
                     password: k
                 });
-                if (!error) location.reload();
-                else alert("Erro de Login: " + error.message);
+                location.reload();
             } else {
-                alert("Identidade Inválida.");
+                log("ERRO: CHAVE_INVÁLIDA");
             }
         }
-
         async function save() {
             const t = document.getElementById('p-title').value;
             const c = document.getElementById('p-content').value;
             const y = document.getElementById('p-yt').value;
             const cl = document.getElementById('p-color').value;
-            const {
-                error
-            } = await voidArchive.from('poems').insert([{
+            await harleyArchive.from('poems').insert([{
                 title: t,
                 content: c,
                 yt_id: y,
                 mood_color: cl
             }]);
-            if (!error) location.reload();
-            else alert("Erro ao Salvar: " + error.message);
+            location.reload();
         }
 
         let player;
@@ -500,6 +545,7 @@
             if (frag && player) {
                 player.loadVideoById(frag.yt_id);
                 player.playVideo();
+                log("ÁUDIO_SINCRONIZADO");
             }
         }
     </script>
