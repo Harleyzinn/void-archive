@@ -139,9 +139,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            /* Para posicionar os botões no rodapé */
         }
-        /* --- NOVO LAYOUT DO VIEWER --- */
         
         #viewer {
             display: flex;
@@ -154,6 +152,7 @@
             flex-direction: column;
             height: 100%;
             width: 100%;
+            opacity: 0;
         }
         
         #v-title {
@@ -193,7 +192,6 @@
             border-top: 1px dotted #ccc;
             padding-bottom: 5px;
         }
-        /* --- ESTILOS GERAIS --- */
         
         .file-item {
             padding: 6px 10px;
@@ -281,10 +279,6 @@
             font-size: 10px;
         }
         
-        .action-btn:active {
-            border: 2px inset #fff;
-        }
-        
         #loader {
             position: fixed;
             inset: 0;
@@ -332,13 +326,11 @@
             <div class="window-content" id="viewer">
                 <div id="empty-hint" style="color:#999; font-size:12px; margin: auto;">// SELECIONE UM FRAGMENTO //</div>
 
-                <div id="v-content" style="display:none;">
+                <div id="v-content">
                     <h1 id="v-title"></h1>
-
                     <div id="v-body-container">
                         <p id="v-body"></p>
                     </div>
-
                     <div class="action-bar">
                         <button class="action-btn" onclick="handleAudio()">PLAY_AUDIO.WAV</button>
                         <button class="action-btn" id="stop-btn" onclick="stopAudio()" style="display:none; color: #800000;">STOP_AUDIO.WAV</button>
@@ -439,7 +431,15 @@
             const frag = dataStore.find(f => f.id === id);
 
             document.getElementById('empty-hint').style.display = 'none';
-            document.getElementById('v-content').style.display = 'flex';
+            const vContent = document.getElementById('v-content');
+
+            // Fade-in e Reset do conteúdo
+            gsap.fromTo(vContent, {
+                opacity: 0
+            }, {
+                opacity: 1,
+                duration: 0.5
+            });
 
             const titleEl = document.getElementById('v-title');
             titleEl.innerText = frag.title;
