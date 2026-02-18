@@ -4,19 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID_ARCHIVE // V12.0_PURE_BLACK</title>
+    <title>VOID_ARCHIVE // MONOLITH_V13</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;800&family=Cinzel:wght@900&display=swap" rel="stylesheet">
 
     <style>
          :root {
-            --cyan: #00f7ff;
-            --magenta: #ff00ea;
+            --neon: #bf00ff;
             --bg: #000000;
-            --border: #ffffff;
-            --glow: 0 0 15px var(--magenta), 0 0 25px var(--cyan);
+            --panel: #080808;
+            --border: 1px solid rgba(191, 0, 255, 0.4);
+            --glow: 0 0 15px rgba(191, 0, 255, 0.3);
         }
         
         * {
@@ -27,7 +27,7 @@
         }
         
         body {
-            background-color: var(--bg) !important;
+            background-color: var(--bg);
             color: #fff;
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
@@ -35,194 +35,176 @@
             display: flex;
             flex-direction: column;
         }
-        /* --- FX CAMADAS (SEM CANVAS) --- */
-        
-        .scanlines {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            pointer-events: none;
-            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(255, 255, 255, 0.03) 2px);
-            opacity: 0.3;
-        }
+        /* --- FX CAMADAS --- */
         
         .vignette {
             position: fixed;
             inset: 0;
             z-index: 9997;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 40%, #000 150%);
+            background: radial-gradient(circle, transparent 20%, #000 150%);
+        }
+        
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(255, 255, 255, 0.02) 2px);
+            opacity: 0.2;
         }
         
         #cursor {
             position: fixed;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #fff;
             z-index: 11000;
             pointer-events: none;
-            box-shadow: var(--glow);
+            box-shadow: 0 0 10px var(--neon);
             mix-blend-mode: difference;
         }
-        /* --- UI ELEMENTS --- */
+        /* --- HEADER MODULAR --- */
         
         header {
-            height: 70px;
+            height: 60px;
             display: flex;
             align-items: center;
             padding: 0 30px;
-            border-bottom: 2px solid #fff;
-            background: #000;
+            background: var(--bg);
+            border-bottom: var(--border);
             justify-content: space-between;
-            z-index: 10;
+            z-index: 100;
         }
         
         .brand {
-            font-family: 'Rubik Glitch';
-            font-size: 2rem;
-            color: #fff;
-            text-shadow: -2px 0 var(--cyan), 2px 0 var(--magenta);
+            font-family: 'Cinzel';
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            color: var(--neon);
+            text-shadow: var(--glow);
         }
+        /* --- LAYOUT MONOLITH --- */
         
         #main-interface {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            height: calc(100vh - 110px);
-            gap: 15px;
-            padding: 15px;
-            position: relative;
+            grid-template-columns: 350px 1fr;
+            height: calc(100vh - 60px);
+            padding: 20px;
+            gap: 20px;
             z-index: 5;
         }
-        /* Lista Lateral */
+        /* Sidebar Index */
         
-        #archive-list {
-            background: rgba(0, 0, 0, 1);
-            border: 2px solid #222;
+        #archive-index {
+            background: var(--panel);
+            border: var(--border);
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
         }
         
-        .list-item {
-            padding: 20px;
-            border-bottom: 1px solid #111;
-            font-size: 0.8rem;
+        .index-item {
+            padding: 15px;
+            border: 1px solid transparent;
+            margin-bottom: 5px;
+            font-size: 0.75rem;
             color: #444;
-            transition: 0.2s;
+            transition: 0.3s;
             cursor: pointer;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .list-item:hover {
+        .index-item:hover {
             color: #fff;
-            background: #0a0a0a;
-            text-shadow: -2px 0 var(--cyan), 2px 0 var(--magenta);
-            padding-left: 30px;
+            border-color: var(--neon);
+            background: rgba(191, 0, 255, 0.05);
         }
         
-        .list-item.active {
-            background: #fff;
+        .index-item.active {
+            background: var(--neon);
             color: #000 !important;
-            font-weight: bold;
-            box-shadow: var(--glow);
+            font-weight: 800;
+            border-color: #fff;
         }
-        /* Visualizador Principal */
+        /* Central Monolith */
         
         #viewer {
-            background: #000;
-            border: 2px solid #fff;
-            padding: 50px;
+            background: var(--panel);
+            border: var(--border);
+            padding: 60px;
             overflow-y: auto;
             position: relative;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
         }
         
         #v-title {
-            font-family: 'Rubik Glitch';
-            font-size: 3.5rem;
-            color: #fff;
-            margin-bottom: 30px;
-            text-shadow: 4px 4px var(--magenta);
+            font-family: 'Cinzel';
+            font-size: 3rem;
+            color: var(--neon);
+            margin-bottom: 40px;
+            text-shadow: var(--glow);
+            border-left: 5px solid var(--neon);
+            padding-left: 20px;
         }
         
         #v-body {
             font-size: 1.1rem;
-            line-height: 1.8;
+            line-height: 2;
             white-space: pre-wrap;
-            color: #eee;
+            color: #ccc;
         }
-        /* Terminal de Log */
+        /* --- LOGIN & ADMIN SYSTEM --- */
         
-        #log-bar {
-            height: 40px;
-            background: #000;
-            border-top: 1px solid #222;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            font-size: 0.6rem;
-            color: #333;
-            gap: 15px;
-            z-index: 10;
-        }
-        /* Botões */
-        
-        #admin-trigger {
+        #admin-panel {
             position: fixed;
-            bottom: 60px;
-            right: 25px;
-            width: 180px;
-            height: 45px;
-            background: #000;
-            border: 2px solid var(--magenta);
-            color: var(--magenta);
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono';
-            font-weight: 800;
-            font-size: 0.7rem;
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 4px 4px 0 var(--cyan);
-            transition: 0.2s;
+            gap: 10px;
         }
         
-        #admin-trigger:hover {
-            background: var(--magenta);
-            color: #000;
-            box-shadow: none;
-            transform: translate(2px, 2px);
-        }
-        
-        .btn-action {
+        .admin-btn {
             background: #000;
-            border: 2px solid #fff;
-            color: #fff;
-            padding: 10px 25px;
-            font-family: 'Rubik Glitch';
+            border: 1px solid #333;
+            color: #333;
+            padding: 10px 20px;
+            font-size: 0.6rem;
+            font-weight: 800;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
         }
         
-        .btn-action:hover {
-            background: #fff;
-            color: #000;
-            box-shadow: 5px 5px 0 var(--magenta);
+        .admin-btn:hover {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+        
+        .admin-btn.logged {
+            border-color: var(--neon);
+            color: var(--neon);
+            box-shadow: var(--glow);
         }
         /* Modais */
         
         .modal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.98);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 10500;
             display: none;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(5px);
         }
         
-        .terminal-box {
+        .terminal-card {
             width: 90%;
-            max-width: 550px;
-            border: 3px solid #fff;
+            max-width: 500px;
+            border: 1px solid var(--neon);
             padding: 40px;
             background: #000;
             box-shadow: var(--glow);
@@ -231,14 +213,26 @@
         input,
         textarea {
             width: 100%;
-            background: #0a0a0a;
-            border: 2px solid #222;
+            background: #050505;
+            border: 1px solid #222;
             padding: 15px;
-            color: #fff;
-            font-family: 'JetBrains Mono';
+            color: var(--neon);
+            font-family: inherit;
             margin-bottom: 15px;
             outline: none;
         }
+        
+        .btn-exe {
+            width: 100%;
+            padding: 15px;
+            background: var(--neon);
+            border: none;
+            color: #000;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        /* Loader */
         
         #loader {
             position: fixed;
@@ -248,14 +242,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--magenta);
-            font-family: 'Rubik Glitch';
-            font-size: 1.5rem;
-            letter-spacing: 10px;
+            color: var(--neon);
+            font-weight: 800;
+            letter-spacing: 5px;
         }
         
         .hidden {
             display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            #main-interface {
+                grid-template-columns: 1fr;
+                grid-template-rows: 35% 1fr;
+            }
+            #v-title {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
@@ -266,71 +269,83 @@
     <div class="vignette"></div>
     <div id="cursor"></div>
 
-    <div id="loader">CARREGANDO...</div>
+    <div id="loader">INITIALIZING_MONOLITH...</div>
 
     <header>
-        <div class="brand">VOID_ARCHIVE // V12</div>
-        <div style="font-size:0.6rem; color:#111;">SYNC_PURE_BLACK_ACTIVE</div>
+        <div class="brand" id="glitch-title">VOID_ARCHIVE</div>
+        <div style="font-size: 0.5rem; color: #222;">SYSTEM_V13_STABLE</div>
     </header>
 
     <section id="main-interface">
-        <aside id="archive-list"></aside>
+        <aside id="archive-index"></aside>
         <main id="viewer">
-            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111; font-size:1.5rem; font-family:'Rubik Glitch';">AWAITING_INPUT</div>
+            <div id="empty-state" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111; font-size:1rem; font-weight:800; letter-spacing:10px;">// NO_DATA_SELECTED //</div>
             <div id="v-content" style="opacity:0;">
                 <div id="v-title"></div>
                 <div id="v-body"></div>
-                <div style="display:flex; gap:20px; margin-top:50px;">
-                    <button class="btn-action" onclick="handleAudio()">▶ PLAY_SIGNAL</button>
-                    <button id="del-btn" class="btn-action hidden" style="border-color:#500; color:#500;">X PURGE</button>
+                <div style="display:flex; gap:20px; margin-top:60px;">
+                    <button class="btn-exe" onclick="handleAudio()" style="width:auto; padding: 10px 30px;">[ ▶ PLAY_SIGNAL ]</button>
+                    <button id="del-btn" class="btn-exe hidden" style="width:auto; padding: 10px 30px; background:#400; color:#fff;">[ X PURGE ]</button>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="log-bar">
-        <span style="color:var(--magenta)">[LOG]:</span>
-        <span id="log-txt">NUCLEO_ESTABILIZADO...</span>
+    <div id="admin-panel">
+        <button id="login-trigger" class="admin-btn" onclick="openLogin()">[ AUTH_LOGIN ]</button>
+        <button id="inject-trigger" class="admin-btn hidden" onclick="openInject()">[ INJECT_DATA ]</button>
     </div>
 
-    <div id="admin-trigger" onclick="showAuth()">ADICIONAR_FRAGMENTO</div>
-
     <div id="auth-modal" class="modal">
-        <div class="terminal-box">
-            <p style="color:#fff; margin-bottom:20px; font-family:'Rubik Glitch'; font-size:1.5rem;">// BIO_AUTH_REQUIRED //</p>
-            <input type="password" id="u-key" placeholder="CHAVE_MESTRA">
-            <button class="btn-action" style="width:100%" onclick="login()">AUTENTICAR</button>
+        <div class="terminal-card">
+            <p style="font-size: 0.7rem; color: #555; margin-bottom: 20px;">// BIO_KEY_REQUIRED //</p>
+            <input type="password" id="u-key" placeholder="CHAVE_MESTRA (317100)">
+            <button class="btn-exe" onclick="verifyAccess()">AUTENTICAR</button>
+            <button onclick="closeModals()" style="background:none; border:none; color:#333; margin-top:15px; cursor:pointer; width:100%; font-size:0.5rem;">[ CANCELAR ]</button>
         </div>
     </div>
 
-    <div id="admin-modal" class="modal">
-        <div class="terminal-box">
-            <input type="text" id="p-title" placeholder="TÍTULO">
+    <div id="inject-modal" class="modal">
+        <div class="terminal-card">
+            <input type="text" id="p-title" placeholder="TÍTULO_DO_FRAGMENTO">
             <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
-            <textarea id="p-content" rows="10" placeholder="DEPOSITE OS DADOS..."></textarea>
-            <input type="color" id="p-color" value="#ff00ea" style="height:45px; cursor:pointer;">
-            <button class="btn-action" style="width:100%" onclick="save()">EXECUTAR_INJEÇÃO</button>
-            <button onclick="closeModals()" style="background:none; border:none; color:#444; margin-top:10px; width:100%; cursor:pointer;">[ FECHAR_TERMINAL ]</button>
+            <textarea id="p-content" rows="10" placeholder="DEPOSITE OS VERSOS..."></textarea>
+            <input type="color" id="p-color" value="#bf00ff" style="height:40px; cursor:pointer;">
+            <button class="btn-exe" onclick="injectFragment()">EXECUTAR_INJEÇÃO</button>
+            <button onclick="closeModals()" style="background:none; border:none; color:#333; margin-top:15px; cursor:pointer; width:100%; font-size:0.5rem;">[ DESCONECTAR_TERMINAL ]</button>
         </div>
     </div>
 
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        const harleyArchive = supabase.createClient(
+        // --- NUCLEO_ESTÁVEL (VOID_V13) ---
+        const voidArchive = supabase.createClient(
             "https://kwapzpyijgeiobcvqtoj.supabase.co",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
         );
 
-        let archiveData = [];
-        let isAuth = false;
+        let dataStore = [];
+        let isHarley = false;
         const typeSfx = new Audio('https://www.soundjay.com/communication/sounds/typewriter-key-1.mp3');
-        typeSfx.volume = 0.15;
+        typeSfx.volume = 0.1;
 
-        function log(msg) {
-            document.getElementById('log-txt').innerText = msg;
+        // --- GLITCH DE TEXTO ---
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@&";
+
+        function scrambleText(element, finalValue) {
+            let iterations = 0;
+            const interval = setInterval(() => {
+                element.innerText = finalValue.split("").map((char, index) => {
+                    if (index < iterations) return finalValue[index];
+                    return chars[Math.floor(Math.random() * chars.length)];
+                }).join("");
+                if (iterations >= finalValue.length) clearInterval(interval);
+                iterations += 1 / 3;
+            }, 30);
         }
 
+        // --- CORE ---
         window.addEventListener('mousemove', (e) => {
             gsap.to("#cursor", {
                 x: e.clientX,
@@ -340,62 +355,68 @@
         });
 
         document.addEventListener('DOMContentLoaded', async() => {
+            scrambleText(document.getElementById('glitch-title'), "VOID_ARCHIVE");
             try {
                 const {
                     data: {
                         session
                     }
-                } = await harleyArchive.auth.getSession();
+                } = await voidArchive.auth.getSession();
                 if (session) {
-                    isAuth = true;
-                    log("OPERADOR_HARLEY: ATIVO");
+                    isHarley = true;
+                    document.getElementById('login-trigger').classList.add('logged');
+                    document.getElementById('login-trigger').innerText = "[ STATUS: ADMIN ]";
+                    document.getElementById('inject-trigger').classList.remove('hidden');
                 }
-                await loadArchive();
+                await syncData();
             } finally {
                 gsap.to("#loader", {
                     opacity: 0,
-                    duration: 0.5,
+                    duration: 0.8,
                     onComplete: () => document.getElementById('loader').style.display = 'none'
                 });
             }
         });
 
-        async function loadArchive() {
+        async function syncData() {
             const {
                 data
-            } = await harleyArchive.from('poems').select('*').order('created_at', {
+            } = await voidArchive.from('poems').select('*').order('created_at', {
                 ascending: false
             });
             if (data) {
-                archiveData = data;
-                render();
+                dataStore = data;
+                renderSidebar();
             }
         }
 
-        function render() {
-            document.getElementById('archive-list').innerHTML = archiveData.map((p, i) => `
-                <div class="list-item" onclick="view('${p.id}', this)" style="border-left: 5px solid ${p.mood_color}">
-                    [${i}] ${p.title}
+        function renderSidebar() {
+            document.getElementById('archive-index').innerHTML = dataStore.map((p, i) => `
+                <div class="index-item" onclick="loadContent('${p.id}', this)" style="border-right: 3px solid ${p.mood_color}">
+                    ${p.title}
                 </div>
             `).join('');
         }
 
-        function view(id, el) {
-            document.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
+        function loadContent(id, el) {
+            document.querySelectorAll('.index-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            const frag = archiveData.find(f => f.id === id);
+            const frag = dataStore.find(f => f.id === id);
 
             document.getElementById('empty-state').style.display = 'none';
-            const v = document.getElementById('v-content');
+            const viewer = document.getElementById('v-content');
 
-            gsap.fromTo(v, {
-                opacity: 0
+            gsap.fromTo(viewer, {
+                opacity: 0,
+                x: -20
             }, {
                 opacity: 1,
-                duration: 0.3,
+                x: 0,
+                duration: 0.5,
                 onStart: () => {
-                    document.getElementById('v-title').innerText = frag.title;
-                    document.getElementById('v-title').style.textShadow = `4px 4px ${frag.mood_color}`;
+                    scrambleText(document.getElementById('v-title'), frag.title);
+                    document.getElementById('v-title').style.color = frag.mood_color;
+
                     const body = document.getElementById('v-body');
                     body.innerHTML = "";
                     let charIdx = 0;
@@ -405,7 +426,6 @@
                         if (charIdx < text.length) {
                             body.innerHTML += text.charAt(charIdx);
                             const s = typeSfx.cloneNode();
-                            s.volume = 0.15;
                             s.play();
                             charIdx++;
                             setTimeout(typewriter, 10);
@@ -415,41 +435,50 @@
                 }
             });
 
-            if (isAuth) {
+            if (isHarley) {
                 const d = document.getElementById('del-btn');
                 d.classList.remove('hidden');
                 d.onclick = async() => {
-                    if (confirm("EXPURGAR?")) {
-                        await harleyArchive.from('poems').delete().eq('id', id);
+                    if (confirm("CONFIRMAR_EXPURGO?")) {
+                        await voidArchive.from('poems').delete().eq('id', id);
                         location.reload();
                     }
                 };
             }
         }
 
-        function showAuth() {
+        // --- ADMIN FUNCTIONS ---
+        function openLogin() {
             document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function openInject() {
+            document.getElementById('inject-modal').style.display = 'flex';
         }
 
         function closeModals() {
             document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         }
-        async function login() {
+
+        async function verifyAccess() {
             const k = document.getElementById('u-key').value;
             if (k === "317100") {
-                await harleyArchive.auth.signInWithPassword({
+                await voidArchive.auth.signInWithPassword({
                     email: "harley@void.com",
                     password: k
                 });
                 location.reload();
+            } else {
+                alert("ACESSO_NEGADO");
             }
         }
-        async function save() {
+
+        async function injectFragment() {
             const t = document.getElementById('p-title').value;
             const c = document.getElementById('p-content').value;
             const y = document.getElementById('p-yt').value;
             const cl = document.getElementById('p-color').value;
-            await harleyArchive.from('poems').insert([{
+            await voidArchive.from('poems').insert([{
                 title: t,
                 content: c,
                 yt_id: y,
@@ -469,7 +498,8 @@
         }
 
         function handleAudio() {
-            const frag = archiveData.find(f => f.title === document.getElementById('v-title').innerText);
+            const title = document.getElementById('v-title').innerText;
+            const frag = dataStore.find(f => f.title === title);
             if (frag && player) {
                 player.loadVideoById(frag.yt_id);
                 player.playVideo();
