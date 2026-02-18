@@ -44,20 +44,16 @@
                 background-color: #0000ff;
             }
         }
-        /* Efeito Flicker para o Título */
         
         @keyframes title-flicker {
             0%,
             100% {
                 opacity: 1;
-                text-shadow: 0 0 0px transparent;
+                filter: drop-shadow(0 0 0px transparent);
             }
             50% {
                 opacity: 0.7;
-                text-shadow: 0 0 8px rgba(0, 0, 128, 0.5);
-            }
-            95% {
-                opacity: 0.9;
+                filter: drop-shadow(0 0 5px currentColor);
             }
         }
         
@@ -139,16 +135,65 @@
             background: #fff;
             border: 2px inset #fff;
             overflow-y: auto;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            position: relative;
+            /* Para posicionar os botões no rodapé */
         }
+        /* --- NOVO LAYOUT DO VIEWER --- */
         
         #viewer {
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
+        
+        #v-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        
+        #v-title {
+            font-family: 'JetBrains Mono';
+            font-size: 1.4rem;
+            color: var(--win-blue);
+            text-align: center;
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+        
+        #v-body-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        #v-body {
+            font-family: 'JetBrains Mono';
+            font-size: 16px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: #333;
+            max-width: 90%;
+        }
+        
+        .action-bar {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-shrink: 0;
+            border-top: 1px dotted #ccc;
+            padding-bottom: 5px;
+        }
+        /* --- ESTILOS GERAIS --- */
         
         .file-item {
             padding: 6px 10px;
@@ -168,23 +213,6 @@
             background: var(--win-blue);
             color: #fff;
             outline: 1px dotted #fff;
-        }
-        
-        #v-title {
-            font-family: 'JetBrains Mono';
-            font-size: 1.6rem;
-            color: var(--win-blue);
-            margin-bottom: 30px;
-            transition: color 0.3s;
-        }
-        
-        #v-body {
-            font-family: 'JetBrains Mono';
-            font-size: 16px;
-            line-height: 1.8;
-            white-space: pre-wrap;
-            color: #333;
-            max-width: 80%;
         }
         
         #taskbar {
@@ -243,14 +271,18 @@
         }
         
         .action-btn {
-            padding: 8px 20px;
+            padding: 8px 15px;
             background: var(--win-gray);
             border-top: 2px solid #fff;
             border-left: 2px solid #fff;
             border-right: 2px solid #404040;
             border-bottom: 2px solid #404040;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
+        }
+        
+        .action-btn:active {
+            border: 2px inset #fff;
         }
         
         #loader {
@@ -298,13 +330,18 @@
                 </div>
             </div>
             <div class="window-content" id="viewer">
-                <div id="empty-hint" style="color:#999; font-size:12px;">// SELECIONE UM FRAGMENTO //</div>
-                <div id="v-content" style="display:none; width: 100%;">
+                <div id="empty-hint" style="color:#999; font-size:12px; margin: auto;">// SELECIONE UM FRAGMENTO //</div>
+
+                <div id="v-content" style="display:none;">
                     <h1 id="v-title"></h1>
-                    <p id="v-body"></p>
-                    <div style="margin-top:50px; display:flex; gap:10px; justify-content: center;">
+
+                    <div id="v-body-container">
+                        <p id="v-body"></p>
+                    </div>
+
+                    <div class="action-bar">
                         <button class="action-btn" onclick="handleAudio()">PLAY_AUDIO.WAV</button>
-                        <button class="action-btn" id="stop-btn" onclick="stopAudio()" style="display:none; color: #800000;">STOP_AUDIO.SYS</button>
+                        <button class="action-btn" id="stop-btn" onclick="stopAudio()" style="display:none; color: #800000;">STOP_AUDIO.WAV</button>
                         <button id="del-btn" class="action-btn hidden" style="color:red;">PURGE.SYS</button>
                     </div>
                 </div>
@@ -314,7 +351,7 @@
 
     <div id="taskbar">
         <div class="start-btn" onclick="toggleStartMenu()">START</div>
-        <div class="task-item" style="border: 2px inset #fff; padding: 2px 15px; font-size: 11px; background: #e0e0e0;">NOTEPAD_VOID</div>
+        <div class="task-item" style="border: 2px inset #fff; padding: 2px 15px; font-size: 11px; background: #e0e0e0; display: flex; align-items: center;">NOTEPAD_VOID</div>
         <div id="clock">00:00</div>
     </div>
 
@@ -402,7 +439,7 @@
             const frag = dataStore.find(f => f.id === id);
 
             document.getElementById('empty-hint').style.display = 'none';
-            document.getElementById('v-content').style.display = 'block';
+            document.getElementById('v-content').style.display = 'flex';
 
             const titleEl = document.getElementById('v-title');
             titleEl.innerText = frag.title;
@@ -446,7 +483,6 @@
             }
         }
 
-        // --- CONTROLE DE ÁUDIO ---
         let player;
 
         function onYouTubeIframeAPIReady() {
@@ -486,7 +522,6 @@
             }
         }
 
-        // --- FUNÇÕES DE SISTEMA ---
         function toggleStartMenu() {
             if (isAuth) document.getElementById('inject-modal').style.display = 'flex';
             else document.getElementById('auth-modal').style.display = 'flex';
