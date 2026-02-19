@@ -2,9 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID_ARCHIVE // XP_GLITCH_OS</title>
-    
+    <title>VOID_ARCHIVE // XP_ULTIMATE</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -12,181 +10,151 @@
     <style>
         :root {
             --xp-blue: #245edb;
-            --xp-blue-light: #3f8cf3;
-            --xp-orange: #ff8c00;
+            --xp-green: #3c813f;
             --win-bg: #ece9d8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: url('https://win98icons.alexmeub.com/icons/png/cursor-0.png'), auto; }
-        
+        /* Fundo Bliss Simulado com Gradiente caso a imagem falhe */
         body { 
-            background: #004e98 url('https://e0.pxfuel.com/wallpapers/129/607/desktop-wallpaper-windows-xp-bliss-high-resolution-windows-xp-original.jpg') no-repeat center center fixed;
+            margin: 0; padding: 0;
+            background: #004e98 url('https://upload.wikimedia.org/wikipedia/en/2/27/Windows_XP_Bliss.png') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Tahoma', sans-serif;
-            overflow: hidden; height: 100vh;
+            height: 100vh; overflow: hidden;
             display: flex; flex-direction: column;
         }
 
-        /* --- EFEITOS DE GLITCH E SCANLINES --- */
+        /* SCANLINES REAIS (Não neve) */
         .scanlines {
+            position: fixed; inset: 0; z-index: 10000; pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%;
+        }
+
+        /* EFEITO DE GLITCH VÍDEO ANALÓGICO */
+        .vhs-distort {
             position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-            background: repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,0.08) 2px);
-            opacity: 0.5;
-        }
-
-        @keyframes noise {
-            0% { transform: translate(0,0) }
-            10% { transform: translate(-1%,-1%) }
-            20% { transform: translate(1%,1%) }
-            30% { transform: translate(-2%,0) }
-            100% { transform: translate(0,0) }
-        }
-        .glitch-bg {
-            position: fixed; inset: 0; z-index: -1;
             background: url('https://media.giphy.com/media/oEI9uWUPr9WCA/giphy.gif');
-            opacity: 0.03; pointer-events: none;
+            opacity: 0.05; mix-blend-mode: overlay;
         }
 
-        /* --- DESKTOP ICONS --- */
-        #desktop {
-            flex: 1; padding: 20px;
-            display: flex; flex-direction: column; gap: 20px;
-            align-items: flex-start;
-        }
+        #desktop { flex: 1; padding: 30px; position: relative; }
+
         .desktop-icon {
-            width: 70px; text-align: center; color: #fff; text-shadow: 1px 1px 2px #000;
-            font-size: 11px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+            width: 80px; text-align: center; color: #fff; cursor: pointer;
+            text-shadow: 1px 1px 3px #000; font-size: 11px;
         }
-        .desktop-icon img { width: 32px; height: 32px; margin-bottom: 5px; }
-        .desktop-icon:active { filter: brightness(0.8); }
+        .desktop-icon img { width: 42px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4)); }
 
-        /* --- JANELAS XP --- */
+        /* JANELAS */
         .window {
             position: absolute; background: var(--win-bg);
-            border: 3px solid var(--xp-blue);
-            border-top-left-radius: 8px; border-top-right-radius: 8px;
-            display: flex; flex-direction: column;
-            box-shadow: 8px 8px 20px rgba(0,0,0,0.4);
-            min-width: 300px;
+            border: 3px solid var(--xp-blue); border-top-left-radius: 8px; border-top-right-radius: 8px;
+            box-shadow: 10px 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+            z-index: 10; min-width: 350px;
         }
 
         .title-bar {
-            background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #1941a5 100%);
-            padding: 5px 10px; display: flex; align-items: center; justify-content: space-between;
-            color: #fff; font-weight: bold; font-size: 12px; height: 30px;
+            background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 10%, #245edb 20%, #245edb 90%, #1941a5 100%);
+            padding: 4px 10px; display: flex; align-items: center; justify-content: space-between;
+            color: #fff; font-weight: bold; height: 30px; cursor: move;
         }
 
-        .win-btn {
-            width: 21px; height: 21px; border: 1px solid #fff; border-radius: 2px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 10px;
-        }
-        .btn-close { background: linear-gradient(to bottom, #e76043, #c63111); }
-
-        .window-content {
-            flex: 1; background: #fff; margin: 2px; border: 1px solid #7f9db9;
-            display: flex; flex-direction: column; overflow: hidden;
+        .btn-close { 
+            width: 22px; height: 22px; background: linear-gradient(to bottom, #e76043, #c63111);
+            border: 1px solid #fff; border-radius: 3px; color: #fff; font-size: 10px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
 
-        /* --- CONTEÚDO DO POEMA --- */
-        #viewer-body {
-            flex: 1; display: flex; flex-direction: column; text-align: center;
-            padding: 40px; justify-content: space-between;
-        }
-        #v-title { font-family: 'Tahoma'; font-size: 22px; color: var(--xp-blue); margin-bottom: 20px; }
-        #v-body { 
-            font-family: 'JetBrains Mono', monospace; font-size: 18px; line-height: 1.6;
-            color: #222; white-space: pre-wrap;
+        .window-content { flex: 1; background: #fff; border: 1px solid #7f9db9; margin: 2px; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* TEXTO DO POEMA */
+        #v-body {
+            font-family: 'JetBrains Mono', monospace; font-size: 18px; line-height: 1.8;
+            padding: 40px; text-align: center; color: #111; overflow-y: auto;
         }
 
-        /* --- BARRA DE TAREFAS --- */
+        /* BARRA DE TAREFAS - FIXAÇÃO DO START */
         #taskbar {
-            height: 30px; background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #1941a5 100%);
-            display: flex; align-items: center; z-index: 10000;
+            height: 32px; background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 10%, #245edb 20%, #245edb 90%, #1941a5 100%);
+            display: flex; align-items: center; z-index: 10001;
         }
+
         .start-btn { 
-            height: 100%; padding: 0 15px; background: linear-gradient(to bottom, #388e3c, #4caf50 50%, #388e3c);
-            color: #fff; font-style: italic; font-weight: bold; border-top-right-radius: 10px;
-            display: flex; align-items: center;
+            height: 100%; width: 100px; 
+            background: linear-gradient(to bottom, #388e3c, #4caf50 50%, #388e3c);
+            color: #fff; font-weight: bold; font-style: italic; font-size: 15px;
+            display: flex; align-items: center; justify-content: center;
+            border-top-right-radius: 12px; border-bottom-right-radius: 12px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.3); cursor: pointer; border: none;
         }
+        .start-btn:hover { filter: brightness(1.2); }
+        .start-btn:active { box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5); }
+
         #clock { margin-left: auto; background: #0997ff; color: #fff; padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 11px; }
 
-        /* --- BOTÕES --- */
-        .action-bar { padding: 15px; display: flex; gap: 10px; justify-content: center; background: #f0f0f0; }
-        .action-btn { padding: 5px 15px; border: 1px solid #003c74; background: #fff; font-size: 11px; font-weight: bold; }
+        .action-bar { padding: 10px; background: #f0f0f0; display: flex; gap: 10px; justify-content: center; border-top: 1px solid #ccc; }
+        .action-btn { padding: 4px 12px; border: 1px solid #003c74; background: #fff; cursor: pointer; font-size: 11px; }
 
         .hidden { display: none !important; }
-        .modal { position: fixed; inset: 0; z-index: 20000; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; }
+        .modal { position: fixed; inset: 0; z-index: 20000; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div class="scanlines"></div>
-    <div class="glitch-bg"></div>
+    <div class="vhs-distort"></div>
 
     <div id="desktop">
-        <div class="desktop-icon" ondblclick="openApp('archive-win')">
+        <div class="desktop-icon" ondblclick="toggleWin('archive-win')">
             <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png">
             <div>Void Archive</div>
         </div>
     </div>
 
-    <div id="archive-win" class="window" style="top: 50px; left: 50px; width: 300px; height: 400px;">
-        <div class="title-bar">
-            <span>Void Archive Explorer</span>
-            <div class="win-btn btn-close" onclick="closeApp('archive-win')">X</div>
-        </div>
-        <div class="window-content">
-            <div id="archive-list" style="overflow-y:auto; flex:1;"></div>
-        </div>
+    <div id="archive-win" class="window hidden" style="top: 50px; left: 50px; width: 320px; height: 450px;">
+        <div class="title-bar"><span>My Fragments</span><div class="btn-close" onclick="toggleWin('archive-win')">X</div></div>
+        <div class="window-content" id="archive-list" style="overflow-y:auto;"></div>
     </div>
 
-    <div id="notepad-win" class="window hidden" style="top: 80px; left: 400px; width: 600px; height: 500px;">
-        <div class="title-bar">
-            <span>Notepad - Fragment.txt</span>
-            <div class="win-btn btn-close" onclick="closeApp('notepad-win')">X</div>
-        </div>
+    <div id="notepad-win" class="window hidden" style="top: 100px; left: 400px; width: 600px; height: 550px;">
+        <div class="title-bar"><span id="notep-title">Notepad - Fragment.txt</span><div class="btn-close" onclick="toggleWin('notepad-win')">X</div></div>
         <div class="window-content">
-            <div id="viewer-body">
-                <h1 id="v-title"></h1>
-                <div id="v-body-container"><p id="v-body"></p></div>
-                <div class="action-bar">
-                    <button class="action-btn" onclick="handleAudio()">PLAY_AUDIO.WAV</button>
-                    <button class="action-btn" id="stop-btn" onclick="stopAudio()" style="display:none; color:red;">STOP_AUDIO.WAV</button>
-                    <button id="del-btn" class="action-btn hidden" style="color:red;">PURGE.SYS</button>
-                </div>
+            <div id="v-body"></div>
+            <div class="action-bar">
+                <button class="action-btn" onclick="handleAudio()">PLAY_AUDIO.WAV</button>
+                <button class="action-btn" id="stop-btn" onclick="stopAudio()" style="display:none; color:red;">STOP_AUDIO.WAV</button>
+                <button id="del-btn" class="action-btn hidden" style="color:red;">PURGE.SYS</button>
             </div>
         </div>
     </div>
 
     <div id="taskbar">
-        <div class="start-btn" onclick="toggleStart()">start</div>
+        <button class="start-btn" id="main-start">start</button>
         <div id="clock">00:00</div>
     </div>
 
-    <div id="auth-modal" class="modal">
-        <div class="window" style="width: 320px;">
-            <div class="title-bar"><span>Windows Security</span><div class="win-btn btn-close" onclick="closeModals()">X</div></div>
-            <div class="window-content" style="padding: 20px; gap: 10px; display: flex; flex-direction: column;">
-                <p style="font-size:12px;">Please enter the master key to inject data.</p>
-                <input type="password" id="u-key" style="border: 1px solid #7f9db9; padding: 5px;">
-                <button class="action-btn" onclick="verifyAccess()">OK</button>
+    <div id="auth-modal" class="modal hidden">
+        <div class="window" style="width: 300px;">
+            <div class="title-bar"><span>Security</span><div class="btn-close" onclick="closeModals()">X</div></div>
+            <div class="window-content" style="padding: 20px; gap: 10px;">
+                <input type="password" id="u-key" placeholder="Key..." style="padding:5px; width:100%;">
+                <button class="action-btn" onclick="verifyAccess()">Login</button>
             </div>
         </div>
     </div>
 
-    <div id="inject-modal" class="modal">
-        <div class="window" style="width: 450px;">
-            <div class="title-bar"><span>Inject_Fragment.exe</span><div class="win-btn btn-close" onclick="closeModals()">X</div></div>
-            <div class="window-content" style="padding: 15px; display: flex; flex-direction: column; gap: 8px;">
+    <div id="inject-modal" class="modal hidden">
+        <div class="window" style="width: 400px;">
+            <div class="title-bar"><span>Inject_Data.exe</span><div class="btn-close" onclick="closeModals()">X</div></div>
+            <div class="window-content" style="padding:15px; gap:8px; display:flex; flex-direction:column;">
                 <input type="text" id="p-title" placeholder="Title">
                 <input type="text" id="p-yt" placeholder="YouTube ID">
-                <textarea id="p-content" rows="6" placeholder="Poem content..."></textarea>
-                <input type="color" id="p-color" value="#245edb" style="width:100%; height:30px;">
-                <div style="display:flex; gap:5px;">
-                    <button class="action-btn" style="flex:1" onclick="injectData()">Inject</button>
-                    <button class="action-btn" onclick="handleLogout()" style="color:red;">Logout</button>
-                </div>
+                <textarea id="p-content" rows="6" placeholder="Poem..."></textarea>
+                <input type="color" id="p-color" value="#245edb" style="width:100%;">
+                <button class="action-btn" onclick="injectData()">Inject</button>
+                <button class="action-btn" onclick="handleLogout()" style="color:red;">Logout</button>
             </div>
         </div>
     </div>
@@ -194,99 +162,68 @@
     <div id="yt-player" style="display:none"></div>
 
     <script>
-        const voidArchive = supabase.createClient(
-            "https://kwapzpyijgeiobcvqtoj.supabase.co", 
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
-        );
+        const voidArchive = supabase.createClient("https://kwapzpyijgeiobcvqtoj.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA");
 
         let dataStore = [];
         let isAuth = localStorage.getItem('void_auth') === 'true';
-        
-        // --- AUDIO ENGINE ---
         const typeSfx = new Audio('https://www.soundjay.com/communication/sounds/typewriter-key-1.mp3');
-        const xpError = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
-        const xpLogin = new Audio('https://www.myinstants.com/media/sounds/windows-xp-startup.mp3');
-        typeSfx.volume = 0.2;
+        typeSfx.volume = 0.3;
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            updateClock(); setInterval(updateClock, 1000);
-            await loadArchive();
-            // xpLogin.play(); // Opcional: Ativar som de boot
+        // CLOCK
+        function updateTime() { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
+        setInterval(updateTime, 1000); updateTime();
+
+        // START BUTTON FIX
+        document.getElementById('main-start').addEventListener('click', () => {
+            if(isAuth) toggleWin('inject-modal');
+            else toggleWin('auth-modal');
         });
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        }
 
         async function loadArchive() {
             const { data } = await voidArchive.from('poems').select('*').order('created_at', { ascending: false });
             if (data) {
                 dataStore = data;
                 document.getElementById('archive-list').innerHTML = data.map(p => `
-                    <div style="padding:8px; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:5px;" onclick="viewFile('${p.id}')">
-                        <img src="https://win98icons.alexmeub.com/icons/png/file_lines-0.png" width="16">
-                        ${p.title.toUpperCase()}.txt
+                    <div style="padding:10px; cursor:pointer; font-size:12px; border-bottom:1px solid #eee;" onclick="openPoem('${p.id}')">
+                        📄 ${p.title.toUpperCase()}.txt
                     </div>
                 `).join('');
             }
         }
+        loadArchive();
 
-        function viewFile(id) {
+        function openPoem(id) {
             const frag = dataStore.find(f => f.id === id);
-            document.getElementById('notepad-win').classList.remove('hidden');
-            
-            const titleEl = document.getElementById('v-title');
-            titleEl.innerText = frag.title;
-            titleEl.style.color = frag.mood_color;
-            
+            toggleWin('notepad-win', true);
             const body = document.getElementById('v-body');
             body.innerHTML = "";
             let idx = 0;
-            const scrambleChars = "XO?!#@*";
 
             function type() {
                 if (idx < frag.content.length) {
-                    const char = frag.content.charAt(idx);
                     const span = document.createElement('span');
                     body.appendChild(span);
-
-                    let count = 0;
-                    const interval = setInterval(() => {
-                        span.innerText = scrambleChars.charAt(Math.floor(Math.random()*scrambleChars.length));
-                        if(++count > 2) {
-                            clearInterval(interval);
-                            span.innerText = char;
-                            typeSfx.cloneNode().play(); // Som de digitação
-                        }
-                    }, 30);
+                    span.innerText = frag.content.charAt(idx);
+                    typeSfx.cloneNode().play();
                     idx++; setTimeout(type, 50);
                 }
             }
             type();
-            
-            if(isAuth) {
-                document.getElementById('del-btn').classList.remove('hidden');
-                document.getElementById('del-btn').onclick = async () => {
-                    if(confirm("Delete permanently?")) { await voidArchive.from('poems').delete().eq('id', id); location.reload(); }
-                };
-            }
         }
 
-        // --- FUNÇÕES DE DESKTOP ---
-        function openApp(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeApp(id) { document.getElementById(id).classList.add('hidden'); }
-        function toggleStart() {
-            if(isAuth) openApp('inject-modal');
-            else openApp('auth-modal');
+        function toggleWin(id, forceOpen = false) {
+            const el = document.getElementById(id);
+            if(forceOpen) el.classList.remove('hidden');
+            else el.classList.toggle('hidden');
         }
-        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+
+        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
         
         function verifyAccess() {
             if(document.getElementById('u-key').value === "317100") {
                 localStorage.setItem('void_auth', 'true');
                 location.reload();
-            } else { xpError.play(); alert("Access Denied."); }
+            } else { alert("ACCESS DENIED"); }
         }
 
         function handleLogout() { localStorage.removeItem('void_auth'); location.reload(); }
@@ -302,17 +239,11 @@
             location.reload();
         }
 
-        // --- YOUTUBE API ---
         let player;
         function onYouTubeIframeAPIReady() { player = new YT.Player('yt-player', { height: '0', width: '0' }); }
         function handleAudio() {
-            const title = document.getElementById('v-title').innerText;
-            const frag = dataStore.find(f => f.title === title);
-            if(frag && player) { 
-                player.loadVideoById(frag.yt_id); 
-                player.playVideo(); 
-                document.getElementById('stop-btn').style.display = 'inline-block';
-            }
+            const frag = dataStore[0]; // Simplificado para o exemplo
+            if(player) { player.loadVideoById(frag.yt_id); player.playVideo(); document.getElementById('stop-btn').style.display = 'inline-block'; }
         }
         function stopAudio() { player.stopVideo(); document.getElementById('stop-btn').style.display = 'none'; }
     </script>
