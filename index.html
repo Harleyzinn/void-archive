@@ -1,377 +1,191 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID_ARCHIVE // V15.0_STABLE</title>
-
+    <title>VOID_ARCHIVE // XP_GLITCH_OS</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-         :root {
-            --win-gray: #c0c0c0;
-            --win-blue: #000080;
-            --win-blue-light: #1084d0;
-            --win-teal: #008080;
+        :root {
+            --xp-blue: #245edb;
+            --xp-blue-light: #3f8cf3;
+            --xp-orange: #ff8c00;
+            --win-bg: #ece9d8;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: url('https://win98icons.alexmeub.com/icons/png/cursor-0.png'), auto; }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            cursor: none;
+        body { 
+            background: #004e98 url('https://e0.pxfuel.com/wallpapers/129/607/desktop-wallpaper-windows-xp-bliss-high-resolution-windows-xp-original.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Tahoma', sans-serif;
+            overflow: hidden; height: 100vh;
+            display: flex; flex-direction: column;
         }
-        
-        body {
-            background-color: var(--win-teal);
-            font-family: 'Tahoma', 'Segoe UI', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            animation: bg-glitch 10s infinite;
-        }
-        
-        @keyframes bg-glitch {
-            0%,
-            98% {
-                background-color: var(--win-teal);
-            }
-            99% {
-                background-color: #0000ff;
-            }
-        }
-        
-        @keyframes title-flicker {
-            0%,
-            100% {
-                opacity: 1;
-                filter: drop-shadow(0 0 0px transparent);
-            }
-            50% {
-                opacity: 0.7;
-                filter: drop-shadow(0 0 5px currentColor);
-            }
-        }
-        
-        .flicker-active {
-            animation: title-flicker 0.1s infinite;
-        }
-        
-        #cursor {
-            position: fixed;
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            z-index: 11000;
-            pointer-events: none;
-            border: 1px solid #000;
-            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
-        }
-        
+
+        /* --- EFEITOS DE GLITCH E SCANLINES --- */
         .scanlines {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            pointer-events: none;
-            background: repeating-linear-gradient(transparent 0px, transparent 1px, rgba(0, 0, 0, 0.05) 2px);
-            opacity: 0.3;
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            background: repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,0.08) 2px);
+            opacity: 0.5;
         }
-        
-        #os-container {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            padding: 10px;
-            gap: 10px;
-            height: calc(100vh - 35px);
+
+        @keyframes noise {
+            0% { transform: translate(0,0) }
+            10% { transform: translate(-1%,-1%) }
+            20% { transform: translate(1%,1%) }
+            30% { transform: translate(-2%,0) }
+            100% { transform: translate(0,0) }
         }
-        
+        .glitch-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: url('https://media.giphy.com/media/oEI9uWUPr9WCA/giphy.gif');
+            opacity: 0.03; pointer-events: none;
+        }
+
+        /* --- DESKTOP ICONS --- */
+        #desktop {
+            flex: 1; padding: 20px;
+            display: flex; flex-direction: column; gap: 20px;
+            align-items: flex-start;
+        }
+        .desktop-icon {
+            width: 70px; text-align: center; color: #fff; text-shadow: 1px 1px 2px #000;
+            font-size: 11px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+        }
+        .desktop-icon img { width: 32px; height: 32px; margin-bottom: 5px; }
+        .desktop-icon:active { filter: brightness(0.8); }
+
+        /* --- JANELAS XP --- */
         .window {
-            background: var(--win-gray);
-            border-top: 2px solid #fff;
-            border-left: 2px solid #fff;
-            border-right: 2px solid #404040;
-            border-bottom: 2px solid #404040;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 1px 1px 0 #000;
+            position: absolute; background: var(--win-bg);
+            border: 3px solid var(--xp-blue);
+            border-top-left-radius: 8px; border-top-right-radius: 8px;
+            display: flex; flex-direction: column;
+            box-shadow: 8px 8px 20px rgba(0,0,0,0.4);
+            min-width: 300px;
         }
-        
+
         .title-bar {
-            background: linear-gradient(90deg, var(--win-blue), var(--win-blue-light));
-            padding: 3px 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #fff;
-            font-weight: bold;
-            font-size: 11px;
-            height: 22px;
+            background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #1941a5 100%);
+            padding: 5px 10px; display: flex; align-items: center; justify-content: space-between;
+            color: #fff; font-weight: bold; font-size: 12px; height: 30px;
         }
-        
+
         .win-btn {
-            width: 16px;
-            height: 14px;
-            background: var(--win-gray);
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-right: 1px solid #404040;
-            border-bottom: 1px solid #404040;
-            color: #000;
-            font-size: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
+            width: 21px; height: 21px; border: 1px solid #fff; border-radius: 2px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 10px;
         }
-        
+        .btn-close { background: linear-gradient(to bottom, #e76043, #c63111); }
+
         .window-content {
-            flex: 1;
-            margin: 4px;
-            background: #fff;
-            border: 2px inset #fff;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+            flex: 1; background: #fff; margin: 2px; border: 1px solid #7f9db9;
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        
-        #viewer {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+
+        /* --- CONTEÚDO DO POEMA --- */
+        #viewer-body {
+            flex: 1; display: flex; flex-direction: column; text-align: center;
+            padding: 40px; justify-content: space-between;
         }
-        
-        #v-content {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-            opacity: 0;
+        #v-title { font-family: 'Tahoma'; font-size: 22px; color: var(--xp-blue); margin-bottom: 20px; }
+        #v-body { 
+            font-family: 'JetBrains Mono', monospace; font-size: 18px; line-height: 1.6;
+            color: #222; white-space: pre-wrap;
         }
-        
-        #v-title {
-            font-family: 'JetBrains Mono';
-            font-size: 1.4rem;
-            color: var(--win-blue);
-            text-align: center;
-            margin-top: 10px;
-            flex-shrink: 0;
-        }
-        
-        #v-body-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px 0;
-        }
-        
-        #v-body {
-            font-family: 'JetBrains Mono';
-            font-size: 16px;
-            line-height: 1.8;
-            white-space: pre-wrap;
-            color: #333;
-            max-width: 90%;
-        }
-        
-        .action-bar {
-            margin-top: auto;
-            padding-top: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-shrink: 0;
-            border-top: 1px dotted #ccc;
-            padding-bottom: 5px;
-        }
-        
-        .file-item {
-            padding: 6px 10px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #000;
-        }
-        
-        .file-item:hover {
-            background: var(--win-blue);
-            color: #fff;
-        }
-        
-        .file-item.active {
-            background: var(--win-blue);
-            color: #fff;
-            outline: 1px dotted #fff;
-        }
-        
+
+        /* --- BARRA DE TAREFAS --- */
         #taskbar {
-            height: 35px;
-            background: var(--win-gray);
-            border-top: 2px solid #fff;
-            display: flex;
-            align-items: center;
-            padding: 2px 5px;
-            gap: 5px;
-            z-index: 1000;
+            height: 30px; background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #1941a5 100%);
+            display: flex; align-items: center; z-index: 10000;
         }
-        
-        .start-btn {
-            padding: 2px 12px;
-            font-weight: bold;
-            border-top: 2px solid #fff;
-            border-left: 2px solid #fff;
-            border-right: 2px solid #404040;
-            border-bottom: 2px solid #404040;
-            font-size: 12px;
+        .start-btn { 
+            height: 100%; padding: 0 15px; background: linear-gradient(to bottom, #388e3c, #4caf50 50%, #388e3c);
+            color: #fff; font-style: italic; font-weight: bold; border-top-right-radius: 10px;
+            display: flex; align-items: center;
         }
-        
-        #clock {
-            margin-left: auto;
-            border: 2px inset #fff;
-            padding: 2px 10px;
-            font-size: 11px;
-        }
-        
-        .modal {
-            position: fixed;
-            inset: 0;
-            z-index: 10500;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.4);
-        }
-        
-        .modal-body {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        input,
-        textarea {
-            padding: 6px;
-            border: 2px inset #fff;
-            background: #fff;
-            font-family: 'JetBrains Mono';
-            font-size: 13px;
-            outline: none;
-        }
-        
-        .action-btn {
-            padding: 8px 15px;
-            background: var(--win-gray);
-            border-top: 2px solid #fff;
-            border-left: 2px solid #fff;
-            border-right: 2px solid #404040;
-            border-bottom: 2px solid #404040;
-            font-weight: bold;
-            font-size: 10px;
-        }
-        
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 100000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 11px;
-            letter-spacing: 5px;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
+        #clock { margin-left: auto; background: #0997ff; color: #fff; padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 11px; }
+
+        /* --- BOTÕES --- */
+        .action-bar { padding: 15px; display: flex; gap: 10px; justify-content: center; background: #f0f0f0; }
+        .action-btn { padding: 5px 15px; border: 1px solid #003c74; background: #fff; font-size: 11px; font-weight: bold; }
+
+        .hidden { display: none !important; }
+        .modal { position: fixed; inset: 0; z-index: 20000; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; }
     </style>
 </head>
-
 <body>
 
     <div class="scanlines"></div>
-    <div id="cursor"></div>
-    <div id="loader">C:\> SCANDISK_IN_PROGRESS...</div>
+    <div class="glitch-bg"></div>
 
-    <div id="os-container">
-        <div class="window">
-            <div class="title-bar">
-                <span>FRAGMENT_EXPLORER.EXE</span>
-                <div class="win-btn">?</div>
-            </div>
-            <div class="window-content">
-                <div id="archive-list"></div>
-            </div>
+    <div id="desktop">
+        <div class="desktop-icon" ondblclick="openApp('archive-win')">
+            <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png">
+            <div>Void Archive</div>
         </div>
+    </div>
 
-        <div class="window">
-            <div class="title-bar">
-                <span>NOTEPAD_VOID.EXE</span>
-                <div class="title-controls" style="display:flex; gap:2px;">
-                    <div class="win-btn">_</div>
-                    <div class="win-btn">X</div>
-                </div>
-            </div>
-            <div class="window-content" id="viewer">
-                <div id="empty-hint" style="color:#999; font-size:12px; margin: auto;">// SELECIONE UM FRAGMENTO //</div>
+    <div id="archive-win" class="window" style="top: 50px; left: 50px; width: 300px; height: 400px;">
+        <div class="title-bar">
+            <span>Void Archive Explorer</span>
+            <div class="win-btn btn-close" onclick="closeApp('archive-win')">X</div>
+        </div>
+        <div class="window-content">
+            <div id="archive-list" style="overflow-y:auto; flex:1;"></div>
+        </div>
+    </div>
 
-                <div id="v-content">
-                    <h1 id="v-title"></h1>
-                    <div id="v-body-container">
-                        <p id="v-body"></p>
-                    </div>
-                    <div class="action-bar">
-                        <button class="action-btn" onclick="handleAudio()">PLAY_AUDIO.WAV</button>
-                        <button class="action-btn" id="stop-btn" onclick="stopAudio()" style="display:none; color: #800000;">STOP_AUDIO.WAV</button>
-                        <button id="del-btn" class="action-btn hidden" style="color:red;">PURGE.SYS</button>
-                    </div>
+    <div id="notepad-win" class="window hidden" style="top: 80px; left: 400px; width: 600px; height: 500px;">
+        <div class="title-bar">
+            <span>Notepad - Fragment.txt</span>
+            <div class="win-btn btn-close" onclick="closeApp('notepad-win')">X</div>
+        </div>
+        <div class="window-content">
+            <div id="viewer-body">
+                <h1 id="v-title"></h1>
+                <div id="v-body-container"><p id="v-body"></p></div>
+                <div class="action-bar">
+                    <button class="action-btn" onclick="handleAudio()">PLAY_AUDIO.WAV</button>
+                    <button class="action-btn" id="stop-btn" onclick="stopAudio()" style="display:none; color:red;">STOP_AUDIO.WAV</button>
+                    <button id="del-btn" class="action-btn hidden" style="color:red;">PURGE.SYS</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="taskbar">
-        <div class="start-btn" onclick="toggleStartMenu()">START</div>
-        <div class="task-item" style="border: 2px inset #fff; padding: 2px 15px; font-size: 11px; background: #e0e0e0; display: flex; align-items: center;">NOTEPAD_VOID</div>
+        <div class="start-btn" onclick="toggleStart()">start</div>
         <div id="clock">00:00</div>
     </div>
 
     <div id="auth-modal" class="modal">
-        <div class="window" style="width: 300px;">
-            <div class="title-bar"><span>SYSTEM_AUTH</span>
-                <div class="win-btn" onclick="closeModals()">X</div>
-            </div>
-            <div class="modal-body">
-                <div class="field" style="display:flex; flex-direction:column; gap:5px;"><label style="font-size:11px; font-weight:bold;">CHAVE MESTRA:</label><input type="password" id="u-key"></div>
-                <button class="action-btn" onclick="verifyAccess()">EXECUTAR</button>
+        <div class="window" style="width: 320px;">
+            <div class="title-bar"><span>Windows Security</span><div class="win-btn btn-close" onclick="closeModals()">X</div></div>
+            <div class="window-content" style="padding: 20px; gap: 10px; display: flex; flex-direction: column;">
+                <p style="font-size:12px;">Please enter the master key to inject data.</p>
+                <input type="password" id="u-key" style="border: 1px solid #7f9db9; padding: 5px;">
+                <button class="action-btn" onclick="verifyAccess()">OK</button>
             </div>
         </div>
     </div>
 
     <div id="inject-modal" class="modal">
         <div class="window" style="width: 450px;">
-            <div class="title-bar"><span>INJECT_FRAGMENT.EXE</span>
-                <div class="win-btn" onclick="closeModals()">X</div>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="p-title" placeholder="TÍTULO">
-                <input type="text" id="p-yt" placeholder="YOUTUBE_ID">
-                <textarea id="p-content" rows="8" placeholder="CONTEÚDO"></textarea>
-                <input type="color" id="p-color" value="#000080" style="width:100%; height:35px;">
-                <div style="display:flex; gap:10px;">
-                    <button class="action-btn" onclick="injectData()" style="flex:1">INJETAR</button>
-                    <button class="action-btn" onclick="handleLogout()" style="color:red;">LOGOUT</button>
+            <div class="title-bar"><span>Inject_Fragment.exe</span><div class="win-btn btn-close" onclick="closeModals()">X</div></div>
+            <div class="window-content" style="padding: 15px; display: flex; flex-direction: column; gap: 8px;">
+                <input type="text" id="p-title" placeholder="Title">
+                <input type="text" id="p-yt" placeholder="YouTube ID">
+                <textarea id="p-content" rows="6" placeholder="Poem content..."></textarea>
+                <input type="color" id="p-color" value="#245edb" style="width:100%; height:30px;">
+                <div style="display:flex; gap:5px;">
+                    <button class="action-btn" style="flex:1" onclick="injectData()">Inject</button>
+                    <button class="action-btn" onclick="handleLogout()" style="color:red;">Logout</button>
                 </div>
             </div>
         </div>
@@ -381,167 +195,102 @@
 
     <script>
         const voidArchive = supabase.createClient(
-            "https://kwapzpyijgeiobcvqtoj.supabase.co",
+            "https://kwapzpyijgeiobcvqtoj.supabase.co", 
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3YXB6cHlpamdlaW9iY3ZxdG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTY2MDIsImV4cCI6MjA4Njc3MjYwMn0.Ode2Fe8gQyM7PcgBPwPvsmfclnKZroaknr6Qkwr4JdA"
         );
 
         let dataStore = [];
         let isAuth = localStorage.getItem('void_auth') === 'true';
+        
+        // --- AUDIO ENGINE ---
         const typeSfx = new Audio('https://www.soundjay.com/communication/sounds/typewriter-key-1.mp3');
+        const xpError = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
+        const xpLogin = new Audio('https://www.myinstants.com/media/sounds/windows-xp-startup.mp3');
         typeSfx.volume = 0.2;
 
-        window.addEventListener('mousemove', (e) => {
-            gsap.to("#cursor", {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.1
-            });
+        document.addEventListener('DOMContentLoaded', async () => {
+            updateClock(); setInterval(updateClock, 1000);
+            await loadArchive();
+            // xpLogin.play(); // Opcional: Ativar som de boot
         });
 
-        document.addEventListener('DOMContentLoaded', async() => {
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-            }, 1000);
-            await loadArchive();
-            gsap.to("#loader", {
-                opacity: 0,
-                duration: 1,
-                onComplete: () => document.getElementById('loader').style.display = 'none'
-            });
-        });
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        }
 
         async function loadArchive() {
-            const {
-                data
-            } = await voidArchive.from('poems').select('*').order('created_at', {
-                ascending: false
-            });
+            const { data } = await voidArchive.from('poems').select('*').order('created_at', { ascending: false });
             if (data) {
                 dataStore = data;
                 document.getElementById('archive-list').innerHTML = data.map(p => `
-                    <div class="file-item" onclick="viewFile('${p.id}', this)">📄 ${p.title.toUpperCase()}.TXT</div>
+                    <div style="padding:8px; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:5px;" onclick="viewFile('${p.id}')">
+                        <img src="https://win98icons.alexmeub.com/icons/png/file_lines-0.png" width="16">
+                        ${p.title.toUpperCase()}.txt
+                    </div>
                 `).join('');
             }
         }
 
-        function viewFile(id, el) {
-            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
+        function viewFile(id) {
             const frag = dataStore.find(f => f.id === id);
-
-            document.getElementById('empty-hint').style.display = 'none';
-            const vContent = document.getElementById('v-content');
-
-            // Fade-in e Reset do conteúdo
-            gsap.fromTo(vContent, {
-                opacity: 0
-            }, {
-                opacity: 1,
-                duration: 0.5
-            });
-
+            document.getElementById('notepad-win').classList.remove('hidden');
+            
             const titleEl = document.getElementById('v-title');
             titleEl.innerText = frag.title;
-            titleEl.style.color = frag.mood_color || 'var(--win-blue)';
-
+            titleEl.style.color = frag.mood_color;
+            
             const body = document.getElementById('v-body');
             body.innerHTML = "";
             let idx = 0;
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#$@&*()_";
+            const scrambleChars = "XO?!#@*";
 
             function type() {
                 if (idx < frag.content.length) {
-                    const originalChar = frag.content.charAt(idx);
+                    const char = frag.content.charAt(idx);
                     const span = document.createElement('span');
                     body.appendChild(span);
 
-                    let scrambleCount = 0;
-                    const scrambleInterval = setInterval(() => {
-                        span.innerText = chars.charAt(Math.floor(Math.random() * chars.length));
-                        if (++scrambleCount > 3) {
-                            clearInterval(scrambleInterval);
-                            span.innerText = originalChar;
-                            typeSfx.cloneNode().play();
+                    let count = 0;
+                    const interval = setInterval(() => {
+                        span.innerText = scrambleChars.charAt(Math.floor(Math.random()*scrambleChars.length));
+                        if(++count > 2) {
+                            clearInterval(interval);
+                            span.innerText = char;
+                            typeSfx.cloneNode().play(); // Som de digitação
                         }
                     }, 30);
-                    idx++;
-                    setTimeout(type, 60);
+                    idx++; setTimeout(type, 50);
                 }
             }
             type();
-
-            if (isAuth) {
-                const dBtn = document.getElementById('del-btn');
-                dBtn.classList.remove('hidden');
-                dBtn.onclick = async() => {
-                    if (confirm("PURGE DATA?")) {
-                        await voidArchive.from('poems').delete().eq('id', id);
-                        location.reload();
-                    }
+            
+            if(isAuth) {
+                document.getElementById('del-btn').classList.remove('hidden');
+                document.getElementById('del-btn').onclick = async () => {
+                    if(confirm("Delete permanently?")) { await voidArchive.from('poems').delete().eq('id', id); location.reload(); }
                 };
             }
         }
 
-        let player;
-
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('yt-player', {
-                height: '0',
-                width: '0',
-                events: {
-                    'onStateChange': onPlayerStateChange
-                }
-            });
+        // --- FUNÇÕES DE DESKTOP ---
+        function openApp(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeApp(id) { document.getElementById(id).classList.add('hidden'); }
+        function toggleStart() {
+            if(isAuth) openApp('inject-modal');
+            else openApp('auth-modal');
         }
-
-        function handleAudio() {
-            const title = document.getElementById('v-title').innerText;
-            const frag = dataStore.find(f => f.title === title);
-            if (frag && player) {
-                player.loadVideoById(frag.yt_id);
-                player.playVideo();
-                document.getElementById('stop-btn').style.display = 'inline-block';
-            }
-        }
-
-        function stopAudio() {
-            if (player) {
-                player.stopVideo();
-                document.getElementById('v-title').classList.remove('flicker-active');
-                document.getElementById('stop-btn').style.display = 'none';
-            }
-        }
-
-        function onPlayerStateChange(event) {
-            const titleEl = document.getElementById('v-title');
-            if (event.data == YT.PlayerState.PLAYING) {
-                titleEl.classList.add('flicker-active');
-            } else {
-                titleEl.classList.remove('flicker-active');
-            }
-        }
-
-        function toggleStartMenu() {
-            if (isAuth) document.getElementById('inject-modal').style.display = 'flex';
-            else document.getElementById('auth-modal').style.display = 'flex';
-        }
-
-        function closeModals() {
-            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        }
-
+        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+        
         function verifyAccess() {
-            if (document.getElementById('u-key').value === "317100") {
+            if(document.getElementById('u-key').value === "317100") {
                 localStorage.setItem('void_auth', 'true');
                 location.reload();
-            } else alert("ACCESS DENIED");
+            } else { xpError.play(); alert("Access Denied."); }
         }
 
-        function handleLogout() {
-            localStorage.removeItem('void_auth');
-            location.reload();
-        }
+        function handleLogout() { localStorage.removeItem('void_auth'); location.reload(); }
+
         async function injectData() {
             const payload = {
                 title: document.getElementById('p-title').value,
@@ -552,8 +301,21 @@
             await voidArchive.from('poems').insert([payload]);
             location.reload();
         }
+
+        // --- YOUTUBE API ---
+        let player;
+        function onYouTubeIframeAPIReady() { player = new YT.Player('yt-player', { height: '0', width: '0' }); }
+        function handleAudio() {
+            const title = document.getElementById('v-title').innerText;
+            const frag = dataStore.find(f => f.title === title);
+            if(frag && player) { 
+                player.loadVideoById(frag.yt_id); 
+                player.playVideo(); 
+                document.getElementById('stop-btn').style.display = 'inline-block';
+            }
+        }
+        function stopAudio() { player.stopVideo(); document.getElementById('stop-btn').style.display = 'none'; }
     </script>
     <script src="https://www.youtube.com/iframe_api"></script>
 </body>
-
 </html>
